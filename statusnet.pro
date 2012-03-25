@@ -15,9 +15,9 @@ QT -= gui
 
 #input
 HEADERS += \
-	StatusNetSyncFWPlugin.h 
+	syncfw-plugin/StatusNetSyncFWPlugin.h 
 SOURCES += \
-	StatusNetSyncFWPlugin.cpp 
+	syncfw-plugin/StatusNetSyncFWPlugin.cpp 
 
 QMAKE_CXXFLAGS = -Wall \
 	-g \
@@ -28,12 +28,12 @@ QMAKE_CXXFLAGS = -Wall \
 target.path = /usr/lib/sync/ 
 
 client.path = /etc/sync/profiles/client 
-client.files = xml/statusnet.xml
+client.files = syncfw-plugin/xml/statusnet.xml
 
 sync.path = /etc/sync/profiles/sync
-sync.files = xml/sync/*
+sync.files = syncfw-plugin/xml/sync/*
 
 service.path = /etc/sync/profiles/service
-service.files = xml/service/*
+service.files = syncfw-plugin/xml/service/*
 
 INSTALLS += target client sync service
