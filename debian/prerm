@@ -1,0 +1,3 @@
+#!/bin/sh
+/usr/bin/aegis-exec -s -u user dbus-send --dest=com.meego.msyncd --print-reply /synchronizer com.meego.msyncd.uninstallPlugin string:'statusnet'
+exit 0
