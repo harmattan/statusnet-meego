@@ -36,4 +36,25 @@ sync.files = syncfw-plugin/xml/sync/*
 service.path = /etc/sync/profiles/service
 service.files = syncfw-plugin/xml/service/*
 
-INSTALLS += target client sync service
+duidesktop.path = /usr/share/duicontrolpanel/desktops/
+duidesktop.files = duicontrolpanel/desktop/*
+
+duiuidesc.path = /usr/share/duicontrolpanel/uidescriptions/
+duiuidesc.files = duicontrolpanel/uidescriptions/*
+
+statusnet.path = /usr/share/statusnet/
+statusnet.files = statusnet-handler.py
+
+statusnetlib.path = /usr/share/statusnet/statusnet/
+statusnetlib.files = statusnet/*
+
+oauthlib.path = /usr/share/statusnet/oauth/
+oauthlib.files = oauth/*
+
+eventfeedlib.path = /usr/share/statusnet/eventfeed/
+eventfeedlib.files = eventfeed/*
+
+images.path = /usr/share/statusnet/images/
+images.files = images/*
+
+INSTALLS += target client sync service duidesktop duiuidesc statusnet statusnetlib oauthlib eventfeedlib
