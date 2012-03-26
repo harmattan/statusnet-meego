@@ -66,7 +66,8 @@ class StatusNetHandler():
 
 	def showStatus(self, status):
 		icon = self.getAvatar(status['user']['profile_image_url'])
-		item = EventFeedItem(icon, status['user']['name'], datetime.datetime.strptime(status['created_at'], "%a %b %d %H:%M:%S +0000 %Y"))
+		title = "%s on StatusNet" % status['user']['name']
+		item = EventFeedItem(icon, title, datetime.datetime.strptime(status['created_at'], "%a %b %d %H:%M:%S +0000 %Y"))
 		item.set_body(status['text'])
 		item.set_url(self.api_path.replace("/api", "/notice") + "/" + str(status['id']))
 		self.eventService.add_item(item)
