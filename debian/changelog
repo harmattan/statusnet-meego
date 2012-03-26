@@ -1,3 +1,9 @@
+statusnet (0.1-2) unstable; urgency=low
+
+  * Add postinst and prerm scripts for tidy up and triggering syncfw
+
+ -- Michael Sheldon <elleo@gnu.org>  Sun, 25 Mar 2012 18:43:46 +0100
+
 statusnet (0.1-1) unstable; urgency=low
 
   * Initial release
