@@ -57,4 +57,7 @@ eventfeedlib.files = eventfeed/*
 images.path = /usr/share/statusnet/images/
 images.files = images/*
 
+dbus.path = /usr/share/dbus-1/services/
+dbus.files = dbus/*
+
 INSTALLS += target client sync service duidesktop duiuidesc statusnet statusnetlib oauthlib eventfeedlib
