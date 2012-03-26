@@ -1,3 +1,0 @@
-[D-BUS Service]
-Name=com.thpinfo.meego.EventFeedService.statusnet
-Exec=/usr/bin/env python /home/developer/MyDocs/src/statusnet/statusnet-handler.py
