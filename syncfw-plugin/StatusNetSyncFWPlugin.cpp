@@ -6,6 +6,7 @@
 #include <QMap>
 #include <QUrl>
 #include <meventfeed.h> 
+#include <MRemoteAction>
 
 extern "C" StatusNetSyncFWPlugin* createPlugin(const QString& aPluginName, 
 		const Buteo::SyncProfile& aProfile,
@@ -34,6 +35,11 @@ bool StatusNetSyncFWPlugin::init() {
 	//The sync profiles can have some specific key/value pairs this info
 	//can be accessed by this method.
 	iProperties = iProfile.allNonStorageKeys();
+
+	// Register our refresh action
+	MRemoteAction action("com.thpinfo.meego.EventFeedService.statusnet", "/synchronize", "com.thpinfo.meego.EventFeedService.statusnet", "refresh");
+	QDBusInterface interface("com.nokia.home.EventFeed", "/eventfeed", "com.nokia.home.EventFeed", QDBusConnection::sessionBus());
+	interface.call(QDBus::NoBlock, "addRefreshAction", action.toString());
 
 	//return false - if error 
 	//syncfw will call this method first if the plugin is able to initialize properly 
@@ -118,14 +124,10 @@ void StatusNetSyncFWPlugin::updateResults(const Buteo::SyncResults &aResults) {
 
 void StatusNetSyncFWPlugin::updateFeed() {
 	FUNCTION_CALL_TRACE;
-	bool success = false;
 
-	FILE* output = popen("/usr/share/statusnet/statusnet-hander.py", "r");
-	success = true;
-	pclose(output);
-	
-	if(success)
-		syncSuccess();
-	else
-		syncFailed();	 
+	QDBusConnection bus = QDBusConnection::sessionBus();
+	QDBusMessage message = QDBusMessage::createMethodCall("com.thpinfo.meego.EventFeedService.statusnet", "/synchronize", "com.thpinfo.meego.EventFeedService.statusnet", "refresh");
+	bus.send(message);
+
+	syncSuccess();
 }

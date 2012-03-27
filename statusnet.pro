@@ -4,14 +4,13 @@ DEPENDPATH += .
 INCLUDEPATH += .  \
 	 /usr/include/libsynccommon \
 	 /usr/include/libsyncprofile \
-	 /usr/include/meegotouchevents
+	 /usr/include/meegotouchevents 
 
 LIBS += -lsyncpluginmgr -lsyncprofile
 
-CONFIG += debug plugin meegotouchevents  
+CONFIG += debug plugin meegotouchevents meegotouch
 
-QT += dbus network
-QT -= gui
+QT += dbus network gui
 
 #input
 HEADERS += \

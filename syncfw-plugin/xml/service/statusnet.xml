@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<profile  name="example" type="service">
+<profile name="statusnet" type="service">
 	<key name="destinationtype" value="online"/>	      
 	<profile name="statusnet" type="client" >
 	</profile>
