@@ -56,7 +56,6 @@ class StatusNetHandler():
 
 
 	def updateTimeline(self):
-		self.latest = 0
 		statuses = self.statusNet.statuses_home_timeline(self.latest)
 		for status in statuses:
 			self.showStatus(status)
