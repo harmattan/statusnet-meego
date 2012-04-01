@@ -1,28 +1,31 @@
-import QtQuick 1.1
-import QtWebKit 1.0
-import com.nokia.meego 1.0
+import QtQuick 1.1;
+import QtWebKit 1.0;
+import com.nokia.meego 1.0;
 
 Page {
-	id: oauthPage
-	anchors.margins: rootWin.pageMargin
+	id: oauthPage;
+	anchors.margins: rootWin.pageMargin;
 
 	Column {
-		spacing: 10
-		anchors.centerIn: parent
-		anchors.verticalCenterOffset: 40
-		width: 480;
+		spacing: 10;
+		anchors.centerIn: parent;
+		anchors.verticalCenterOffset: 20;
+		width: 440;
+		height: 800;
 
 		WebView {
 			id: oauthWebView;
 			settings.javascriptEnabled: true;
 			width: parent.width;
-			height: 400;
+			height: parent.height - 135;
+			html: "<html><body bgcolor='#000000'></body></html>";
 		}
-	
+
 		Button {
+			id: doneButton;
 			text: "Done";
 			onClicked: {
-				Qt.quit();
+				rootWin.oauthDone()
 			}
 			width: parent.width;
 		}

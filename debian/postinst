@@ -1,4 +1,3 @@
 #!/bin/sh
 /usr/bin/aegis-exec -s -u user dbus-send --dest=com.meego.msyncd --print-reply /synchronizer com.meego.msyncd.installPlugin string:'statusnet'
-/usr/bin/aegis-exec -s -u user /usr/bin/gconftool -s --type=string /apps/ControlPanel/Statusnet/api_path "https://identi.ca/api"
 exit 0

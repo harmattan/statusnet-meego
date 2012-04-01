@@ -41,19 +41,19 @@ duidesktop.files = duicontrolpanel/desktop/*
 duiuidesc.path = /usr/share/duicontrolpanel/uidescriptions/
 duiuidesc.files = duicontrolpanel/uidescriptions/*
 
-statusnet.path = /usr/share/statusnet/
+statusnet.path = /usr/share/statusnet-meego/
 statusnet.files = statusnet-handler.py
 
-statusnetlib.path = /usr/share/statusnet/statusnet/
+statusnetlib.path = /usr/share/statusnet-meego/statusnet/
 statusnetlib.files = statusnet/*
 
-oauthlib.path = /usr/share/statusnet/oauth/
+oauthlib.path = /usr/share/statusnet-meego/oauth/
 oauthlib.files = oauth/*
 
-eventfeedlib.path = /usr/share/statusnet/eventfeed/
+eventfeedlib.path = /usr/share/statusnet-meego/eventfeed/
 eventfeedlib.files = eventfeed/*
 
-images.path = /usr/share/statusnet/images/
+images.path = /usr/share/statusnet-meego/images/
 images.files = images/*
 
 dbus.path = /usr/share/dbus-1/services/
