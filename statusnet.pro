@@ -36,10 +36,7 @@ service.path = /etc/sync/profiles/service
 service.files = syncfw-plugin/xml/service/*
 
 duidesktop.path = /usr/share/duicontrolpanel/desktops/
-duidesktop.files = duicontrolpanel/desktop/*
-
-duiuidesc.path = /usr/share/duicontrolpanel/uidescriptions/
-duiuidesc.files = duicontrolpanel/uidescriptions/*
+duidesktop.files = duicontrolpanel/desktops/*
 
 statusnet.path = /usr/share/statusnet-meego/
 statusnet.files = *.py
@@ -68,4 +65,4 @@ desktop.files = statusnet-meego.desktop
 qml.path = /usr/share/statusnet-meego/qml/
 qml.files = qml/*
 
-INSTALLS += target client sync service duidesktop duiuidesc statusnet statusnetlib oauthlib eventfeedlib dbus icon desktop qml
+INSTALLS += target client sync service statusnet statusnetlib oauthlib eventfeedlib dbus icon desktop qml

@@ -1,20 +1,17 @@
 [Desktop Entry]
-Type=ControlPanelApplet
-Name=Statusnet
+Type=Application
+Name=StatusNet
 X-logical-id=statusnet
-X-translation-catalog=duisettings
+X-translation-catalog=statusnet
 Icon=/usr/share/icons/hicolor/80x80/apps/statusnet.png
+Exec=/usr/bin/invoker --type=e -s /usr/share/statusnet-meego/statusnet-login.py
 
 X-Maemo-Service=com.nokia.DuiControlPanel
 X-Maemo-Method=com.nokia.DuiControlPanelIf.appletPage
 X-Maemo-Object-Path=/
 # this has to be identical to the value in Name
-X-Maemo-Fixed-Args=Statusnet
-
-[DUI]
-X-DUIApplet-Applet=libdeclarative.so
+X-Maemo-Fixed-Args=StatusNet
 
 [DCP]
 Category=Events Feed
 Order=10
-Part=statusnet.xml
