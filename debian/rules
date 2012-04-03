@@ -50,7 +50,7 @@ install: build
 	dh_installdirs
 
 	# Add here commands to install the package into debian/myprogram.
-	$(MAKE) INSTALL_ROOT=$(CURDIR)/debian/statusnet install
+	$(MAKE) INSTALL_ROOT=$(CURDIR)/debian/statusnet-meego install
 
 
 # Build architecture-independent files here.

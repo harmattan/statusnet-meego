@@ -17,6 +17,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from statusnet import StatusNet
+from oauthkeys import oauth_consumer_keys, oauth_consumer_secrets 
 from PySide.QtCore import QCoreApplication
 from PySide.QtGui import QDesktopServices
 from eventfeed import EventFeedService, EventFeedItem
@@ -29,29 +30,29 @@ class StatusNetHandler():
 	def __init__(self):
 		self.app = QCoreApplication(sys.argv)
 
-		# Get user details
 		self.client = gconf.client_get_default()
-		self.username = self.client.get_string('/apps/ControlPanel/Statusnet/username')
-		self.password= self.client.get_string('/apps/ControlPanel/Statusnet/password')
 		self.api_path = self.client.get_string('/apps/ControlPanel/Statusnet/api_path')
 		self.latest = self.client.get_int('/apps/ControlPanel/Statusnet/latest')
-		if not self.username or not self.password:
-			return
 		if not self.api_path:
-			self.api_path = "https://identi.ca/api"
-		if self.api_path[:4] != "http":
-			self.api_path = "http://" + self.api_path
+			return
+		if self.api_path in oauth_consumer_keys:
+			print "Using oauth"
+			key = oauth_consumer_keys[self.api_path]
+			secret = oauth_consumer_secrets[self.api_path]
+			oauth_token = self.client.get_string("/apps/ControlPanel/Statusnet/oauth_token")
+			oauth_token_secret = self.client.get_string("/apps/ControlPanel/Statusnet/oauth_token_secret")
+			self.statusNet = StatusNet(self.api_path, auth_type="oauth", consumer_key=key, consumer_secret=secret, oauth_token=oauth_token, oauth_token_secret=oauth_token_secret)
+		else:
+			print "Using basic auth"
+			self.username = self.client.get_string('/apps/ControlPanel/Statusnet/username')
+			self.password= self.client.get_string('/apps/ControlPanel/Statusnet/password')
+			self.statusNet = StatusNet(self.api_path, self.username, self.password)
 
 		self.cacheDir = QDesktopServices.storageLocation(QDesktopServices.CacheLocation)
 		if not os.path.exists(self.cacheDir):
 			os.mkdir(self.cacheDir)
 		self.eventService = EventFeedService('statusnet', 'StatusNet')
-		print self.eventService.local_name
 		self.eventService.add_refresh_action()
-		try:
-			self.statusNet = StatusNet(self.api_path, self.username, self.password)
-		except Exception, (errmsg):
-			sys.exit("ERROR: Couldn't establish connection: %s" % (errmsg))
 		self.updateTimeline()
 
 
@@ -66,7 +67,14 @@ class StatusNetHandler():
 	def showStatus(self, status):
 		icon = self.getAvatar(status['user']['profile_image_url'])
 		title = "%s on StatusNet" % status['user']['name']
-		item = EventFeedItem(icon, title, datetime.datetime.strptime(status['created_at'], "%a %b %d %H:%M:%S +0000 %Y"))
+		# Strip out offset
+		timestr = status['created_at'][:-10] + status['created_at'][-4:]
+		offset = status['created_at'][-10:-5]
+		creationtime = datetime.datetime.strptime(timestr, "%a %b %d %H:%M:%S %Y")
+		tz = TimeZone()
+		tz.setOffsetStr(offset)
+		creationtime.replace(tzinfo=tz)
+		item = EventFeedItem(icon, title, creationtime)
 		item.set_body(status['text'])
 		item.set_url(self.api_path.replace("/api", "/notice") + "/" + str(status['id']))
 		self.eventService.add_item(item)
@@ -80,11 +88,27 @@ class StatusNetHandler():
 				out = open(imagePath, 'wb')
 				out.write(urllib2.urlopen(url).read())
 				out.close()
-			except Exception, (err):
-				print err
-				return "/home/developer/MyDocs/src/statusnet/images/statusnet.png"
+			except Exception, err:
+				return "/usr/share/statusnet-meego/images/statusnet.png"
 		return imagePath
 
-	
+
+
+
+class TimeZone(datetime.tzinfo):
+
+
+	def setOffsetStr(self, offset):
+		hours = int(offset[:3])
+		minutes = int(offset[3:5])
+		self.offset = datetime.timedelta(hours=hours, minutes=minutes)
+
+
+	def utcoffset(self, dt):
+		return self.offset
+
+
+
+
 if __name__ == "__main__":
 	StatusNetHandler()

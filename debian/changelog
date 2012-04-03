@@ -1,17 +1,17 @@
-statusnet (0.1-3) unstable; urgency=low
+statusnet-meego (0.1-3) unstable; urgency=low
 
   * Fix package description
   * Improve icon quality
 
  -- Michael Sheldon <elleo@gnu.org>  Tue, 27 Mar 2012 12:53:15 +0100
 
-statusnet (0.1-2) unstable; urgency=low
+statusnet-meego (0.1-2) unstable; urgency=low
 
   * Add postinst and prerm scripts for tidy up and triggering syncfw
 
  -- Michael Sheldon <elleo@gnu.org>  Sun, 25 Mar 2012 18:43:46 +0100
 
-statusnet (0.1-1) unstable; urgency=low
+statusnet-meego (0.1-1) unstable; urgency=low
 
   * Initial release
 

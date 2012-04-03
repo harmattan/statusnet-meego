@@ -95,12 +95,12 @@ class StatusNet(object):
                         raise Exception("OAuth authentication failed")
                 else:
                     raise Exception("OAuth could not be initialised.")
-        self.server_config = self.statusnet_config()
-        try:
-            self.length_limit = int(self.server_config["site"]["textlimit"]) # this will be 0 on unlimited instances
-        except:
-            self.length_limit = 0  # assume unlimited on failure to get a defined limit
-        self.tz = self.server_config["site"]["timezone"]
+            self.server_config = self.statusnet_config()
+            try:
+                self.length_limit = int(self.server_config["site"]["textlimit"]) # this will be 0 on unlimited instances
+            except:
+                self.length_limit = 0  # assume unlimited on failure to get a defined limit
+            self.tz = self.server_config["site"]["timezone"]
 
     def oauth_initialize(self):
         if (self.oauth_token is None) or (self.oauth_token_secret is None):  # we've never run with oauth before, or we failed, so we'll need to authenticate

@@ -11,21 +11,23 @@ Page {
 		anchors.centerIn: parent;
 		anchors.verticalCenterOffset: 20;
 		width: 440;
-		height: 800;
 
-		WebView {
-			id: oauthWebView;
-			settings.javascriptEnabled: true;
+		Label {
+			text: "Please enter the authorisation code provided in the browser window."
 			width: parent.width;
-			height: parent.height - 135;
-			html: "<html><body bgcolor='#000000'></body></html>";
+		}
+
+		TextField {
+			id: verifier;
+			placeholderText: "Authorisation code"
+			width: parent.width;
 		}
 
 		Button {
 			id: doneButton;
 			text: "Done";
 			onClicked: {
-				rootWin.oauthDone()
+				rootWin.oauthDone(verifier.text)
 			}
 			width: parent.width;
 		}

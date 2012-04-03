@@ -42,7 +42,7 @@ duiuidesc.path = /usr/share/duicontrolpanel/uidescriptions/
 duiuidesc.files = duicontrolpanel/uidescriptions/*
 
 statusnet.path = /usr/share/statusnet-meego/
-statusnet.files = statusnet-handler.py
+statusnet.files = *.py
 
 statusnetlib.path = /usr/share/statusnet-meego/statusnet/
 statusnetlib.files = statusnet/*
@@ -59,4 +59,13 @@ images.files = images/*
 dbus.path = /usr/share/dbus-1/services/
 dbus.files = dbus/*
 
-INSTALLS += target client sync service duidesktop duiuidesc statusnet statusnetlib oauthlib eventfeedlib dbus
+icon.path = /usr/share/icons/hicolor/80x80/
+icon.files = images/statusnet.png
+
+desktop.path = /usr/share/applications/
+desktop.files = statusnet-meego.desktop
+
+qml.path = /usr/share/statusnet-meego/qml/
+qml.files = qml/*
+
+INSTALLS += target client sync service duidesktop duiuidesc statusnet statusnetlib oauthlib eventfeedlib dbus icon desktop qml
