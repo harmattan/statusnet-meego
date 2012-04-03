@@ -46,6 +46,8 @@ class StatusNetLogin():
 
 
 	def login(self, api_path, username, password):
+		if api_path[:4] != 'http':
+			api_path = 'http://' + api_path
 		self.api_path = api_path
 		self.client.set_string("/apps/ControlPanel/Statusnet/api_path", api_path)
 		try:
@@ -73,7 +75,6 @@ class StatusNetLogin():
 		oauth_url = "%s/oauth/authorize?oauth_token=%s" % (self.api_path, request_token)
 		QtGui.QDesktopServices.openUrl(oauth_url)
 		self.rootObject.openFile("OAuthPage.qml")
-		print oauth_url
 
 
 	def oauthDone(self, verifier):
