@@ -21,6 +21,7 @@ from oauthkeys import oauth_consumer_keys, oauth_consumer_secrets
 from PySide.QtCore import QCoreApplication
 from PySide.QtGui import QDesktopServices
 from eventfeed import EventFeedService, EventFeedItem
+import statusnetutils
 import sys, datetime, pprint, os, os.path, urllib2, gconf
 
 
@@ -65,7 +66,7 @@ class StatusNetHandler():
 
 
 	def showStatus(self, status):
-		icon = self.getAvatar(status['user']['profile_image_url'])
+		icon = statusnetutils.getAvatar(status['user']['profile_image_url'], self.cacheDir)
 		title = "%s on StatusNet" % status['user']['name']
 		# Strip out offset
 		timestr = status['created_at'][:-10] + status['created_at'][-4:]
@@ -78,21 +79,6 @@ class StatusNetHandler():
 		item.set_body(status['text'])
 		item.set_url(self.api_path.replace("/api", "/notice") + "/" + str(status['id']))
 		self.eventService.add_item(item)
-
-
-	def getAvatar(self, url):
-		filename = url.split("/")[-1]
-		imagePath = os.path.join(self.cacheDir, filename)
-		if not os.path.exists(imagePath):
-			try:
-				out = open(imagePath, 'wb')
-				out.write(urllib2.urlopen(url).read())
-				out.close()
-			except Exception, err:
-				return "/usr/share/statusnet-meego/images/statusnet.png"
-		return imagePath
-
-
 
 
 class TimeZone(datetime.tzinfo):
