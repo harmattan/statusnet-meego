@@ -65,4 +65,4 @@ desktop.files = statusnet-meego.desktop
 qml.path = /usr/share/statusnet-meego/qml/
 qml.files = qml/*
 
-INSTALLS += target client sync service statusnet statusnetlib oauthlib eventfeedlib dbus icon desktop qml
+INSTALLS += target client sync service statusnet statusnetlib oauthlib eventfeedlib dbus icon desktop qml images
