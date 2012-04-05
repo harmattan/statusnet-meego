@@ -71,7 +71,7 @@ class StatusNetMeego():
 		statuses = self.statusNet.statuses_home_timeline(self.latest)
 		for status in statuses:
 			self.addStatus(status, self.timelineModel)
-		self.latest = statuses[-1]['id']
+		self.latest = statuses[0]['id']
 
 
 	def addStatus(self, status, model):
