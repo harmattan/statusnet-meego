@@ -69,9 +69,12 @@ class StatusNetMeego():
 
 	def updateTimeline(self):
 		statuses = self.statusNet.statuses_home_timeline(self.latest)
-		for status in statuses:
-			self.addStatus(status, self.timelineModel)
-		self.latest = statuses[0]['id']
+		if len(statuses) > 0:
+			self.latest = statuses[0]['id']
+			statuses.reverse()
+			print len(statuses)
+			for status in statuses:
+				self.addStatus(status, self.timelineModel)
 
 
 	def addStatus(self, status, model):
@@ -89,7 +92,6 @@ class StatusNetMeego():
 		self.rootObject.setStatusPlaceholder("Reply to %s..." % status['user']['name'])
 		conversationModel = TimelineModel()
 		conversation = self.statusNet.statusnet_conversation(conversationid)
-		conversation.reverse()
 		for status in conversation:
 			self.addStatus(status, conversationModel)
 		self.context.setContextProperty('timelineModel', conversationModel)
@@ -182,9 +184,8 @@ class TimelineModel(QtCore.QAbstractListModel):
 
 
 	def add(self, status):
-		count = len(self._data)
-		self.beginInsertRows(QtCore.QModelIndex(), count, count) #notify view about upcoming change        
-		self._data.append(status)
+		self.beginInsertRows(QtCore.QModelIndex(), 0, 0) #notify view about upcoming change        
+		self._data.insert(0, status)
 		self.endInsertRows() #notify view that change happened
 
 
