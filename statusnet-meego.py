@@ -20,13 +20,18 @@ from statusnet import StatusNet
 import statusnetutils
 from oauthkeys import oauth_consumer_keys, oauth_consumer_secrets 
 from PySide import QtCore, QtGui, QtDeclarative
-import sys, datetime, pprint, os, os.path, urllib2, gconf, signal
+import sys, datetime, pprint, os, os.path, urllib2, gconf, signal, threading
 
 
-class StatusNetMeego():
+class StatusNetMeego(QtCore.QObject):
 
 
-	def __init__(self):
+	onAddStatus = QtCore.Signal(list, QtCore.QAbstractListModel)
+	onDoneWorking = QtCore.Signal()
+
+
+	def __init__(self, parent=None):
+		super(StatusNetMeego, self).__init__(parent)
 		self.app = QtGui.QApplication(sys.argv)
 		self.app.setApplicationName("StatusNet")
 		signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -43,14 +48,16 @@ class StatusNetMeego():
 			oauth_token_secret = self.client.get_string("/apps/ControlPanel/Statusnet/oauth_token_secret")
 			self.statusNet = StatusNet(self.api_path, auth_type="oauth", consumer_key=key, consumer_secret=secret, oauth_token=oauth_token, oauth_token_secret=oauth_token_secret)
 		else:
-			self.username = self.client.get_string('/apps/ControlPanel/Statusnet/username')
-			self.password= self.client.get_string('/apps/ControlPanel/Statusnet/password')
-			self.statusNet = StatusNet(self.api_path, self.username, self.password)
+			username = self.client.get_string('/apps/ControlPanel/Statusnet/username')
+			password= self.client.get_string('/apps/ControlPanel/Statusnet/password')
+			self.statusNet = StatusNet(self.api_path, username, password)
 
 		self.cacheDir = QtGui.QDesktopServices.storageLocation(QtGui.QDesktopServices.CacheLocation)
 		if not os.path.exists(self.cacheDir):
 			os.mkdir(self.cacheDir)
 		self.timelineModel = TimelineModel()
+		self.onAddStatus.connect(self.addStatus)
+		self.onDoneWorking.connect(self.doneWorking)
 		self.view = QtDeclarative.QDeclarativeView()
 		self.view.setSource("qml/Main.qml")
 		self.rootObject = self.view.rootObject()
@@ -68,12 +75,23 @@ class StatusNetMeego():
 
 
 	def updateTimeline(self):
+		self.rootObject.startWorking()
+		thread = threading.Thread(target=self._updateTimeline)
+		thread.start()
+
+
+	def _updateTimeline(self):
 		statuses = self.statusNet.statuses_home_timeline(self.latest)
 		if len(statuses) > 0:
 			self.latest = statuses[0]['id']
 			statuses.reverse()
 			for status in statuses:
-				self.addStatus(status, self.timelineModel)
+				self.onAddStatus.emit(status, self.timelineModel)
+		self.onDoneWorking.emit()
+
+
+	def doneWorking(self):
+		self.rootObject.stopWorking()
 
 
 	def addStatus(self, status, model):
@@ -85,15 +103,22 @@ class StatusNetMeego():
 
 
 	def showStatus(self, statusid, conversationid):
+		self.rootObject.startWorking()
 		self.replyingTo = statusid
 		self.conversation = conversationid
 		status = self.statuses[statusid]
 		self.rootObject.setStatusPlaceholder("Reply to %s..." % status['user']['name'])
 		conversationModel = TimelineModel()
+		self.context.setContextProperty('timelineModel', conversationModel)
+		thread = threading.Thread(target=self._showStatus, args=(status,conversationid,conversationModel))
+		thread.start()
+
+
+	def _showStatus(self, status, conversationid, conversationModel):
 		conversation = self.statusNet.statusnet_conversation(conversationid)
 		for status in conversation:
-			self.addStatus(status, conversationModel)
-		self.context.setContextProperty('timelineModel', conversationModel)
+			self.onAddStatus.emit(status, conversationModel)
+		self.onDoneWorking.emit()
 
 	
 	def back(self):
@@ -117,7 +142,7 @@ class StatusNetMeego():
 
 
 
-class Status(object):
+class Status(QtCore.QObject):
 
 
 	def __init__(self, title, text, avatar, statusid, conversationid, time):

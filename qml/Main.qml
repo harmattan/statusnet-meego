@@ -20,6 +20,16 @@ PageStackWindow {
 		messageDialog.open();
 	}
 
+	function startWorking() {
+		indicator.running = true;
+		indicator.visible = true;
+	}
+
+	function stopWorking() {
+		indicator.running = false;
+		indicator.visible = false;
+	}
+
 	function clearStatus() {
 		status.text = "";
 	}
@@ -47,7 +57,14 @@ PageStackWindow {
 		}
 	}
 
-	 Menu {
+	BusyIndicator {
+		id: indicator
+		platformStyle: BusyIndicatorStyle { size: "large" }
+		running:  false;
+		anchors.centerIn: parent;
+	}
+
+	Menu {
 		id: toolMenu
 		content: MenuLayout {
 
