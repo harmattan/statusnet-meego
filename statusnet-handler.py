@@ -67,30 +67,11 @@ class StatusNetHandler():
 		icon = statusnetutils.getAvatar(status['user']['profile_image_url'], self.cacheDir)
 		title = "%s on StatusNet" % status['user']['name']
 		# Strip out offset
-		timestr = status['created_at'][:-10] + status['created_at'][-4:]
-		offset = status['created_at'][-10:-5]
-		creationtime = datetime.datetime.strptime(timestr, "%a %b %d %H:%M:%S %Y")
-		tz = TimeZone()
-		tz.setOffsetStr(offset)
-		creationtime.replace(tzinfo=tz)
+		creationtime = statusnetutil.getTime(status['created_at'])
 		item = EventFeedItem(icon, title, creationtime)
 		item.set_body(status['text'])
 		item.set_url(self.api_path.replace("/api", "/notice") + "/" + str(status['id']))
 		self.eventService.add_item(item)
-
-
-class TimeZone(datetime.tzinfo):
-
-
-	def setOffsetStr(self, offset):
-		hours = int(offset[:3])
-		minutes = int(offset[3:5])
-		self.offset = datetime.timedelta(hours=hours, minutes=minutes)
-
-
-	def utcoffset(self, dt):
-		return self.offset
-
 
 
 
