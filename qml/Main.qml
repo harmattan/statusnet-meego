@@ -10,6 +10,7 @@ PageStackWindow {
 	}
 
 	signal send(string message);
+	signal selectMessage(int statusid);
 
 	function showMessage(title, message) {
 		messageDialog.titleText = title;
@@ -30,8 +31,11 @@ PageStackWindow {
 		}
 	}
 
+	ToolBarLayout {
+		id: commonTools;
+		visible: false;
 	Row {
-		anchors.bottom: parent.bottom;
+		anchors.centerIn: parent;
 		width: parent.width;
 		spacing: 10;
 
@@ -59,10 +63,6 @@ PageStackWindow {
 		}
 	}
 
-	ToolBarLayout {
-		id: commonTools;
-		visible: false;
-		ToolIcon { iconId: "toolbar-back"; onClicked: { pageStack.pop(); pause(); } }
 	}
 
 	QueryDialog {

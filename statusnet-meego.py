@@ -57,6 +57,7 @@ class StatusNetMeego():
 		context.setContextProperty('timelineModel', self.timelineModel)
 		self.rootObject.openFile("TimelinePage.qml")
 		self.rootObject.send.connect(self.send)
+		self.rootObject.selectMessage.connect(self.showStatus)
 		self.view.showFullScreen()
 		self.updateTimeline()
 		sys.exit(self.app.exec_())
@@ -65,18 +66,22 @@ class StatusNetMeego():
 	def updateTimeline(self):
 		statuses = self.statusNet.statuses_home_timeline()
 		for status in statuses:
-			self.showStatus(status)
+			self.addStatus(status)
 
 
-	def showStatus(self, status):
+	def addStatus(self, status):
 		icon = statusnetutils.getAvatar(status['user']['profile_image_url'], self.cacheDir)
-		status = Status(status['user']['name'], status['text'], icon)
+		status = Status(status['user']['name'], status['text'], icon, status['id'])
 		self.timelineModel.add(status)
+
+
+	def showStatus(self, statusid):
+		self.rootObject.showMessage("Display", str(statusid))
 
 
 	def send(self, status):
 		try:
-			#self.statusNet.statuses_update(status)
+			self.statusNet.statuses_update(status)
 			self.rootObject.clearStatus()
 		except Exception, err:
 			self.rootObject.showMessage("Problem sending message", err.message)
@@ -86,10 +91,11 @@ class StatusNetMeego():
 class Status(object):
 
 
-	def __init__(self, title, text, avatar):
+	def __init__(self, title, text, avatar, statusid):
 		self.title = title
 		self.text = text
 		self.avatar = avatar
+		self.statusid = statusid
 
 
 class TimelineModel(QtCore.QAbstractListModel):
@@ -98,6 +104,7 @@ class TimelineModel(QtCore.QAbstractListModel):
 	TITLE_ROLE = QtCore.Qt.UserRole + 1
 	TEXT_ROLE = QtCore.Qt.UserRole + 2
 	AVATAR_ROLE = QtCore.Qt.UserRole + 3
+	ID_ROLE = QtCore.Qt.UserRole + 4
 
 
 	def __init__(self, parent=None):
@@ -107,6 +114,7 @@ class TimelineModel(QtCore.QAbstractListModel):
 		keys[TimelineModel.TITLE_ROLE] = 'title'
 		keys[TimelineModel.TEXT_ROLE] = 'text'
 		keys[TimelineModel.AVATAR_ROLE] = 'avatar'
+		keys[TimelineModel.ID_ROLE] = 'statusid'
 		self.setRoleNames(keys)
 
 
@@ -129,6 +137,8 @@ class TimelineModel(QtCore.QAbstractListModel):
 			 return status.text
 		 elif role == TimelineModel.AVATAR_ROLE:
 			 return status.avatar
+		 elif role == TimelineModel.ID_ROLE:
+			 return status.statusid
 		 else:
 			 return None
 
