@@ -10,7 +10,7 @@ PageStackWindow {
 	}
 
 	signal send(string message);
-	signal selectMessage(int statusid);
+	signal selectMessage(int conversationid);
 
 	function showMessage(title, message) {
 		messageDialog.titleText = title;
