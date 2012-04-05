@@ -1,8 +1,8 @@
-import os, urllib2
+import os, urllib2, base64
 
 def getAvatar(url, cacheDir):
 	filename = url.split("/")[-1]
-	imagePath = os.path.join(cacheDir, filename)
+	imagePath = os.path.join(cacheDir, base64.b64encode(filename))
 	if not os.path.exists(imagePath):
 		try:   
 			out = open(imagePath, 'wb')
