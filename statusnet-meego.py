@@ -49,12 +49,15 @@ class StatusNetMeego():
 		self.cacheDir = QtGui.QDesktopServices.storageLocation(QtGui.QDesktopServices.CacheLocation)
 		if not os.path.exists(self.cacheDir):
 			os.mkdir(self.cacheDir)
+		self.timelineModel = TimelineModel()
 		self.view = QtDeclarative.QDeclarativeView()
 		self.view.setSource("qml/Main.qml")
 		self.rootObject = self.view.rootObject()
+		context = self.view.rootContext()
+		context.setContextProperty('timelineModel', self.timelineModel)
 		self.rootObject.openFile("TimelinePage.qml")
+		self.rootObject.send.connect(self.send)
 		self.view.showFullScreen()
-		print "Updating timeline..."
 		self.updateTimeline()
 		sys.exit(self.app.exec_())
 
@@ -67,6 +70,75 @@ class StatusNetMeego():
 
 	def showStatus(self, status):
 		icon = statusnetutils.getAvatar(status['user']['profile_image_url'], self.cacheDir)
+		status = Status(status['user']['name'], status['text'], icon)
+		self.timelineModel.add(status)
+
+
+	def send(self, status):
+		try:
+			#self.statusNet.statuses_update(status)
+			self.rootObject.clearStatus()
+		except Exception, err:
+			self.rootObject.showMessage("Problem sending message", err.message)
+
+
+
+class Status(object):
+
+
+	def __init__(self, title, text, avatar):
+		self.title = title
+		self.text = text
+		self.avatar = avatar
+
+
+class TimelineModel(QtCore.QAbstractListModel):
+
+
+	TITLE_ROLE = QtCore.Qt.UserRole + 1
+	TEXT_ROLE = QtCore.Qt.UserRole + 2
+	AVATAR_ROLE = QtCore.Qt.UserRole + 3
+
+
+	def __init__(self, parent=None):
+		super(TimelineModel, self).__init__(parent)
+		self._data = []
+		keys = {}
+		keys[TimelineModel.TITLE_ROLE] = 'title'
+		keys[TimelineModel.TEXT_ROLE] = 'text'
+		keys[TimelineModel.AVATAR_ROLE] = 'avatar'
+		self.setRoleNames(keys)
+
+
+	def rowCount(self, index):
+		return len(self._data)
+
+
+	def data(self, index, role):
+		 if not index.isValid():
+			 return None
+
+		 if index.row() > len(self._data):
+			 return None
+
+		 status = self._data[index.row()]
+
+		 if role == TimelineModel.TITLE_ROLE:
+			 return status.title
+		 elif role == TimelineModel.TEXT_ROLE:
+			 return status.text
+		 elif role == TimelineModel.AVATAR_ROLE:
+			 return status.avatar
+		 else:
+			 return None
+
+
+	def add(self, status):
+		count = len(self._data)
+		self.beginInsertRows(QtCore.QModelIndex(), count, count) #notify view about upcoming change        
+		self._data.append(status)
+		self.endInsertRows() #notify view that change happened
+
 
 
 if __name__ == "__main__":
