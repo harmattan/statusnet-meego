@@ -37,14 +37,12 @@ class StatusNetHandler():
 		if not self.api_path:
 			return
 		if self.api_path in oauth_consumer_keys:
-			print "Using oauth"
 			key = oauth_consumer_keys[self.api_path]
 			secret = oauth_consumer_secrets[self.api_path]
 			oauth_token = self.client.get_string("/apps/ControlPanel/Statusnet/oauth_token")
 			oauth_token_secret = self.client.get_string("/apps/ControlPanel/Statusnet/oauth_token_secret")
 			self.statusNet = StatusNet(self.api_path, auth_type="oauth", consumer_key=key, consumer_secret=secret, oauth_token=oauth_token, oauth_token_secret=oauth_token_secret)
 		else:
-			print "Using basic auth"
 			self.username = self.client.get_string('/apps/ControlPanel/Statusnet/username')
 			self.password= self.client.get_string('/apps/ControlPanel/Statusnet/password')
 			self.statusNet = StatusNet(self.api_path, self.username, self.password)
