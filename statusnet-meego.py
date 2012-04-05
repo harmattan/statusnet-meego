@@ -72,7 +72,6 @@ class StatusNetMeego():
 		if len(statuses) > 0:
 			self.latest = statuses[0]['id']
 			statuses.reverse()
-			print len(statuses)
 			for status in statuses:
 				self.addStatus(status, self.timelineModel)
 

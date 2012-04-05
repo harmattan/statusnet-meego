@@ -65,69 +65,69 @@ PageStackWindow {
 
 	ToolBarLayout {
 		id: commonTools;
-		visible: false;
+		visible: true;
+	}
 
-		Row {
-			anchors.centerIn: parent;
-			width: parent.width - 20;
-			spacing: 10;
+	/* Display row outside of toolbar, otherwise text input doesn't get pushed up when onscreen keyboard appears */
+	Row {
+		anchors.bottom: parent.bottom;
+		anchors.margins: 10;
+		width: parent.width - 20;
+		x: 8;
+		spacing: 10;
 
-			Image {
-				id: menuIcon
-				height: status.height;
-				fillMode: Image.PreserveAspectFit;
-				smooth: true;
-				source: "image://theme/icon-m-toolbar-view-menu-white";
-
-				MouseArea {
-					anchors.fill: parent;
-					onClicked: toolMenu.open();
-				}
+		Image {
+			id: menuIcon
+			height: status.height;
+			fillMode: Image.PreserveAspectFit;
+			smooth: true;
+			source: "image://theme/icon-m-toolbar-view-menu-white";
+			MouseArea {
+				anchors.fill: parent;
+				onClicked: toolMenu.open();
 			}
+		}
 			
-			Image {
-				id: backIcon
-				height: status.height;
-				width: menuIcon.width;
-				fillMode: Image.PreserveAspectFit;
-				smooth: true;
-				visible: false;
-				source: "image://theme/icon-m-toolbar-back-white";
-
-				MouseArea {
-					anchors.fill: parent;
-					onClicked: {
-						rootWin.back();
-						rootWin.hideBack();
-					}
-				}
-			}
-
-			TextField {
-				id: status;
-				objectName: "status";
-				width: parent.width - sendIcon.width - menuIcon.width - parent.spacing - parent.spacing;
-				placeholderText: "Update your status...";
-				visible: true;
-			}
-
-			Image {
-				id: sendIcon;
-				height: status.height;
-				fillMode: Image.PreserveAspectFit;
-				smooth: true;
-				source: "image://theme/icon-m-content-sms-inverse";
-
-				MouseArea {
-					anchors.fill: parent;
-					onClicked: {
-						rootWin.send(status.text);
-					}
+		Image {
+			id: backIcon
+			height: status.height;
+			width: menuIcon.width;
+			fillMode: Image.PreserveAspectFit;
+			smooth: true;
+			visible: false;
+			source: "image://theme/icon-m-toolbar-back-white";
+			MouseArea {
+				anchors.fill: parent;
+				onClicked: {
+					rootWin.back();
+					rootWin.hideBack();
 				}
 			}
 		}
 
+		TextField {
+			id: status;
+			objectName: "status";
+			width: parent.width - sendIcon.width - menuIcon.width - parent.spacing - parent.spacing;
+			placeholderText: "Update your status...";
+			visible: true;
+		}
+
+		Image {
+			id: sendIcon;
+			height: status.height;
+			fillMode: Image.PreserveAspectFit;
+			smooth: true;
+			source: "image://theme/icon-m-content-sms-inverse";
+			MouseArea {
+				anchors.fill: parent;
+				onClicked: {
+					rootWin.send(status.text);
+				}
+			}
+		}
 	}
+
 
 	QueryDialog {
 		id: messageDialog;
