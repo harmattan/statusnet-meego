@@ -34,34 +34,35 @@ PageStackWindow {
 	ToolBarLayout {
 		id: commonTools;
 		visible: false;
-	Row {
-		anchors.centerIn: parent;
-		width: parent.width;
-		spacing: 10;
 
-		TextField {
-			id: status;
-			objectName: "status";
-			width: parent.width - sendIcon.width - parent.spacing;
-			placeholderText: "Update your status...";
-			visible: true;
-		}
+		Row {
+			anchors.centerIn: parent;
+			width: parent.width - 20;
+			spacing: 10;
 
-		Image {
-			id: sendIcon;
-			height: status.height;
-			fillMode: Image.PreserveAspectFit;
-			smooth: true;
-			source: "image://theme/icon-m-content-sms-inverse";
+			TextField {
+				id: status;
+				objectName: "status";
+				width: parent.width - sendIcon.width - parent.spacing;
+				placeholderText: "Update your status...";
+				visible: true;
+			}
 
-			MouseArea {
-				anchors.fill: parent;
-				onClicked: {
-					rootWin.send(status.text);
+			Image {
+				id: sendIcon;
+				height: status.height;
+				fillMode: Image.PreserveAspectFit;
+				smooth: true;
+				source: "image://theme/icon-m-content-sms-inverse";
+
+				MouseArea {
+					anchors.fill: parent;
+					onClicked: {
+						rootWin.send(status.text);
+					}
 				}
 			}
 		}
-	}
 
 	}
 

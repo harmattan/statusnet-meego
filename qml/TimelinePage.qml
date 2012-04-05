@@ -19,7 +19,7 @@ Page {
 		id: statusDelegate;
 
 		Item {
-			height: statusDelegateTitle.height + statusDelegateText.height;
+			height: statusDelegateTitle.height + statusDelegateText.height + statusDelegateTime.height;
 			width: timelineView.width;
 
 			Image {
@@ -42,7 +42,7 @@ Page {
 				id: statusDelegateTitle;
 				width: parent.width - statusDelegateAvatar.width - 20;
 				font.bold: true;
-				font.pixelSize: 18;
+				font.pixelSize: 20;
 				anchors.top: statusDelegateAvatar.top;
 				anchors.left: statusDelegateAvatar.right;
 				anchors.leftMargin: 16;
@@ -52,19 +52,30 @@ Page {
 			Label {
 				id: statusDelegateText;
 				width: parent.width - statusDelegateAvatar.width - 20;
-				font.pixelSize: 18;
+				font.pixelSize: 20;
 				anchors.top: statusDelegateTitle.bottom;
 				anchors.left: statusDelegateAvatar.right;
 				anchors.leftMargin: 16;
 				text: model.text;
 			}
 
+			Label {
+				id: statusDelegateTime;
+				width: parent.width - statusDelegateAvatar.width - 20;
+				font.pixelSize: 16;
+				color: "#6b6b6b";
+				anchors.top: statusDelegateText.bottom;
+				anchors.left: statusDelegateAvatar.right;
+				anchors.leftMargin: 16;
+				text: model.time;
+			}
+
 			MouseArea {
-                                anchors.fill: parent;
-                                onClicked: {
-                                        rootWin.selectMessage(model.statusid);
-                                }
-                        }
+				anchors.fill: parent;
+				onClicked: {
+					rootWin.selectMessage(model.statusid);
+				}
+			}
 		}
 	}
 

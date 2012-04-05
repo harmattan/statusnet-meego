@@ -71,7 +71,8 @@ class StatusNetMeego():
 
 	def addStatus(self, status):
 		icon = statusnetutils.getAvatar(status['user']['profile_image_url'], self.cacheDir)
-		status = Status(status['user']['name'], status['text'], icon, status['id'])
+		creationtime = statusnetutils.getTime(status['created_at'])
+		status = Status(status['user']['name'], status['text'], icon, status['id'], creationtime.strftime("%c"))
 		self.timelineModel.add(status)
 
 
@@ -91,11 +92,12 @@ class StatusNetMeego():
 class Status(object):
 
 
-	def __init__(self, title, text, avatar, statusid):
+	def __init__(self, title, text, avatar, statusid, time):
 		self.title = title
 		self.text = text
 		self.avatar = avatar
 		self.statusid = statusid
+		self.time = time
 
 
 class TimelineModel(QtCore.QAbstractListModel):
@@ -105,6 +107,7 @@ class TimelineModel(QtCore.QAbstractListModel):
 	TEXT_ROLE = QtCore.Qt.UserRole + 2
 	AVATAR_ROLE = QtCore.Qt.UserRole + 3
 	ID_ROLE = QtCore.Qt.UserRole + 4
+	TIME_ROLE = QtCore.Qt.UserRole + 5
 
 
 	def __init__(self, parent=None):
@@ -115,6 +118,7 @@ class TimelineModel(QtCore.QAbstractListModel):
 		keys[TimelineModel.TEXT_ROLE] = 'text'
 		keys[TimelineModel.AVATAR_ROLE] = 'avatar'
 		keys[TimelineModel.ID_ROLE] = 'statusid'
+		keys[TimelineModel.TIME_ROLE] = 'time'
 		self.setRoleNames(keys)
 
 
@@ -139,6 +143,8 @@ class TimelineModel(QtCore.QAbstractListModel):
 			 return status.avatar
 		 elif role == TimelineModel.ID_ROLE:
 			 return status.statusid
+		 elif role == TimelineModel.TIME_ROLE:
+			 return status.time
 		 else:
 			 return None
 
