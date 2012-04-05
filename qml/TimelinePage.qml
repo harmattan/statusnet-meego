@@ -73,7 +73,8 @@ Page {
 			MouseArea {
 				anchors.fill: parent;
 				onClicked: {
-					rootWin.selectMessage(model.conversationid);
+					rootWin.selectMessage(model.statusid, model.conversationid);
+					rootWin.showBack();
 				}
 			}
 		}

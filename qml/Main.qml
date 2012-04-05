@@ -9,8 +9,10 @@ PageStackWindow {
 		theme.inverted = true;
 	}
 
+	signal back();
+	signal refresh();
 	signal send(string message);
-	signal selectMessage(int conversationid);
+	signal selectMessage(int statusid, int conversationid);
 
 	function showMessage(title, message) {
 		messageDialog.titleText = title;
@@ -22,12 +24,42 @@ PageStackWindow {
 		status.text = "";
 	}
 
+	function setStatusPlaceholder(placeholder) {
+		status.placeholderText = placeholder;
+	}
+
+	function showBack() {
+		backIcon.visible = true;
+		menuIcon.visible = false;
+	}
+
+	function hideBack() {
+		backIcon.visible = false;
+		menuIcon.visible = true;
+	}
+
 	function openFile(file) {
 		var component = Qt.createComponent(file);
 		if (component.status == Component.Ready) {
 			pageStack.push(component);
 		} else {
 			console.log("Error loading component:", component.errorString());
+		}
+	}
+
+	 Menu {
+		id: toolMenu
+		content: MenuLayout {
+
+			MenuItem {
+				text: "Refresh"
+				onClicked: rootWin.refresh();
+			}
+
+			MenuItem {
+				text: "About"
+				onClicked: rootWin.showMessage("StatusNet for MeeGo", "Author: Mike Sheldon (elleo@gnu.org)\n\nLicense: GPL 3.0 or later\n\nFeel free to follow me, @mikesheldon, on identi.ca if you think you need more friends :)")
+			}
 		}
 	}
 
@@ -40,10 +72,41 @@ PageStackWindow {
 			width: parent.width - 20;
 			spacing: 10;
 
+			Image {
+				id: menuIcon
+				height: status.height;
+				fillMode: Image.PreserveAspectFit;
+				smooth: true;
+				source: "image://theme/icon-m-toolbar-view-menu-white";
+
+				MouseArea {
+					anchors.fill: parent;
+					onClicked: toolMenu.open();
+				}
+			}
+			
+			Image {
+				id: backIcon
+				height: status.height;
+				width: menuIcon.width;
+				fillMode: Image.PreserveAspectFit;
+				smooth: true;
+				visible: false;
+				source: "image://theme/icon-m-toolbar-back-white";
+
+				MouseArea {
+					anchors.fill: parent;
+					onClicked: {
+						rootWin.back();
+						rootWin.hideBack();
+					}
+				}
+			}
+
 			TextField {
 				id: status;
 				objectName: "status";
-				width: parent.width - sendIcon.width - parent.spacing;
+				width: parent.width - sendIcon.width - menuIcon.width - parent.spacing - parent.spacing;
 				placeholderText: "Update your status...";
 				visible: true;
 			}

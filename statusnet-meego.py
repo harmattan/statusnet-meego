@@ -54,10 +54,12 @@ class StatusNetMeego():
 		self.view = QtDeclarative.QDeclarativeView()
 		self.view.setSource("qml/Main.qml")
 		self.rootObject = self.view.rootObject()
-		context = self.view.rootContext()
-		context.setContextProperty('timelineModel', self.timelineModel)
+		self.context = self.view.rootContext()
+		self.context.setContextProperty('timelineModel', self.timelineModel)
 		self.rootObject.openFile("TimelinePage.qml")
 		self.rootObject.send.connect(self.send)
+		self.rootObject.back.connect(self.back)
+		self.rootObject.refresh.connect(self.updateTimeline)
 		self.rootObject.selectMessage.connect(self.showStatus)
 		self.view.showFullScreen()
 		self.latest = -1
@@ -80,19 +82,34 @@ class StatusNetMeego():
 		model.add(status)
 
 
-	def showStatus(self, conversationid):
+	def showStatus(self, statusid, conversationid):
+		self.replyingTo = statusid
+		self.conversation = conversationid
+		status = self.statuses[statusid]
+		self.rootObject.setStatusPlaceholder("Reply to %s..." % status['user']['name'])
 		conversationModel = TimelineModel()
 		conversation = self.statusNet.statusnet_conversation(conversationid)
 		conversation.reverse()
 		for status in conversation:
 			self.addStatus(status, conversationModel)
-		context = self.view.rootContext()
-		context.setContextProperty('timelineModel', conversationModel)
+		self.context.setContextProperty('timelineModel', conversationModel)
+
+	
+	def back(self):
+		self.replyingTo = None
+		self.conversation = None
+		self.rootObject.setStatusPlaceholder("Update your status...")
+		self.context.setContextProperty('timelineModel', self.timelineModel)
 
 
 	def send(self, status):
 		try:
-			self.statusNet.statuses_update(status)
+			if self.replyingTo:
+				self.statusNet.statuses_update(status, in_reply_to_status_id=self.replyingTo)
+				self.showStatus(self.replyingTo, self.conversation)
+			else:
+				self.statusNet.statuses_update(status)
+				self.updateTimeline()
 			self.rootObject.clearStatus()
 		except Exception, err:
 			self.rootObject.showMessage("Problem sending message", err.message)
