@@ -67,7 +67,7 @@ class StatusNetHandler():
 		icon = statusnetutils.getAvatar(status['user']['profile_image_url'], self.cacheDir)
 		title = "%s on StatusNet" % status['user']['name']
 		# Strip out offset
-		creationtime = statusnetutil.getTime(status['created_at'])
+		creationtime = statusnetutils.getTime(status['created_at'])
 		item = EventFeedItem(icon, title, creationtime)
 		item.set_body(status['text'])
 		item.set_url(self.api_path.replace("/api", "/notice") + "/" + str(status['id']))
