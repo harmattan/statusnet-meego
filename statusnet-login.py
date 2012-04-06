@@ -21,6 +21,7 @@ from PySide import QtCore, QtGui, QtDeclarative
 from statusnet import StatusNet
 from oauth import oauth
 from oauthkeys import oauth_consumer_keys, oauth_consumer_secrets
+import subprocess
 
 
 class StatusNetLogin():
@@ -97,8 +98,13 @@ class StatusNetLogin():
 
 
 	def success(self):
-		self.rootObject.showMessage("Log in successful!", "StatusNet messages will now start appearing in your events feed.\n\nIf you've only just installed the StatusNet plug-in you'll need to restart your phone before it takes effect.")
-		self.rootObject.messageAccepted.connect(self.app.exit)
+		self.rootObject.showMessage("Log in successful!", "If you've only just installed StatusNet for MeeGo you'll need to restart your phone before messages will start appearing in your events feed.")
+		self.rootObject.messageAccepted.connect(self.confirmed)
+
+
+	def confirmed(self):
+		self.app.exit(2)
+
 
 if __name__ == "__main__":
 	StatusNetLogin()

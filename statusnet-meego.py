@@ -22,6 +22,7 @@ from oauthkeys import oauth_consumer_keys, oauth_consumer_secrets
 from PySide import QtCore, QtGui, QtDeclarative
 import dbus, dbus.service, dbus.mainloop, dbus.glib
 import sys, datetime, os, os.path, urllib2, gconf, signal, threading
+import subprocess
 
 
 class Signals(QtCore.QObject):
@@ -50,18 +51,13 @@ class StatusNetMeego(dbus.service.Object):
 		self.client = gconf.client_get_default()
 		self.api_path = self.client.get_string('/apps/ControlPanel/Statusnet/api_path')
 		if not self.api_path:
-			import statusnetlogin
-			statusnetlogin.StatusNetLogin()
-		if self.api_path in oauth_consumer_keys:
-			key = oauth_consumer_keys[self.api_path]
-			secret = oauth_consumer_secrets[self.api_path]
-			oauth_token = self.client.get_string("/apps/ControlPanel/Statusnet/oauth_token")
-			oauth_token_secret = self.client.get_string("/apps/ControlPanel/Statusnet/oauth_token_secret")
-			self.statusNet = StatusNet(self.api_path, auth_type="oauth", consumer_key=key, consumer_secret=secret, oauth_token=oauth_token, oauth_token_secret=oauth_token_secret)
-		else:
-			username = self.client.get_string('/apps/ControlPanel/Statusnet/username')
-			password= self.client.get_string('/apps/ControlPanel/Statusnet/password')
-			self.statusNet = StatusNet(self.api_path, username, password)
+			ret = subprocess.call(["/usr/bin/invoker", "--type=e", "-s", "/usr/share/statusnet-meego/statusnet-login.py"])
+			if ret == 2:
+				self.api_path = self.client.get_string('/apps/ControlPanel/Statusnet/api_path')
+			else:
+				return
+
+		self.login()
 
 		self.cacheDir = QtGui.QDesktopServices.storageLocation(QtGui.QDesktopServices.CacheLocation)
 		if not os.path.exists(self.cacheDir):
@@ -94,6 +90,26 @@ class StatusNetMeego(dbus.service.Object):
 	        dbus.service.Object.__init__(self, object_path="/EventFeedService", bus_name=bus_name)
 
 		sys.exit(self.app.exec_())
+
+
+	def login(self):
+		try:
+			if self.api_path in oauth_consumer_keys:
+				key = oauth_consumer_keys[self.api_path]
+				secret = oauth_consumer_secrets[self.api_path]
+				oauth_token = self.client.get_string("/apps/ControlPanel/Statusnet/oauth_token")
+				oauth_token_secret = self.client.get_string("/apps/ControlPanel/Statusnet/oauth_token_secret")
+				self.statusNet = StatusNet(self.api_path, auth_type="oauth", consumer_key=key, consumer_secret=secret, oauth_token=oauth_token, oauth_token_secret=oauth_token_secret)
+			else:
+				username = self.client.get_string('/apps/ControlPanel/Statusnet/username')
+				password= self.client.get_string('/apps/ControlPanel/Statusnet/password')
+				self.statusNet = StatusNet(self.api_path, username, password)
+		except:
+			ret = subprocess.call(["/usr/bin/invoker", "--type=e", "-s", "/usr/share/statusnet-meego/statusnet-login.py"])
+			if ret == 2:
+				self.login()
+			else:
+				return
 
 
 	def updateTimeline(self):
