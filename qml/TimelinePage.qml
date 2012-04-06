@@ -13,6 +13,7 @@ Page {
 		spacing: 10;
 		model: timelineModel;
 		delegate: statusDelegate;
+		cacheBuffer: 100;
 		footer: Rectangle { 
 				id: fetchButton;
 				width: parent.width;
