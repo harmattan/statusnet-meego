@@ -8,7 +8,7 @@ Homepage: http://blog.mikeasoft.com/category/statusnet-meego
 
 Package: statusnet-meego
 Architecture: any
-Depends: python-pyside.qtcore, python-pyside.qtgui, python-dbus, python-gconf, python-pyside.qtwebkit, libqtwebkit-qmlwebkitplugin, ${shlibs:Depends}, ${misc:Depends}
+Depends: python-pyside.qtcore, python-pyside.qtgui, python-dbus, python-gconf, libqtwebkit-qmlwebkitplugin, ${shlibs:Depends}, ${misc:Depends}
 Description: Receive updates from your friends on StatusNet services
  such as identi.ca.
  StatusNet is a federated free software microblogging platform. This
