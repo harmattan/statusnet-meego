@@ -126,7 +126,7 @@ void StatusNetSyncFWPlugin::updateFeed() {
 	FUNCTION_CALL_TRACE;
 
 	QDBusConnection bus = QDBusConnection::sessionBus();
-	QDBusMessage message = QDBusMessage::createMethodCall("com.thpinfo.meego.EventFeedService.statusnet", "/synchronize", "com.thpinfo.meego.EventFeedService.statusnet", "refresh");
+	QDBusMessage message = QDBusMessage::createMethodCall("com.mikeasoft.statusnet", "/synchronize", "com.mikeasoft.statusnet", "refresh");
 	bus.send(message);
 
 	syncSuccess();
