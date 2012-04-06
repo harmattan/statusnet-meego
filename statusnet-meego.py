@@ -26,7 +26,7 @@ import sys, datetime, pprint, os, os.path, urllib2, gconf, signal, threading
 class StatusNetMeego(QtCore.QObject):
 
 
-	onAddStatus = QtCore.Signal(list, QtCore.QAbstractListModel)
+	onAddStatus = QtCore.Signal(list, QtCore.QAbstractListModel, bool)
 	onDoneWorking = QtCore.Signal()
 
 
@@ -67,9 +67,11 @@ class StatusNetMeego(QtCore.QObject):
 		self.rootObject.send.connect(self.send)
 		self.rootObject.back.connect(self.back)
 		self.rootObject.refresh.connect(self.updateTimeline)
+		self.rootObject.fetchMore.connect(self.fetchMore)
 		self.rootObject.selectMessage.connect(self.showStatus)
 		self.view.showFullScreen()
 		self.latest = -1
+		self.earliest = None
 		self.updateTimeline()
 		# Update every 10 minutes
 		timer = QtCore.QTimer(self)
@@ -88,9 +90,27 @@ class StatusNetMeego(QtCore.QObject):
 		statuses = self.statusNet.statuses_home_timeline(self.latest)
 		if len(statuses) > 0:
 			self.latest = statuses[0]['id']
+			if self.earliest == None or self.earliest > statuses[-1]['id']:
+				self.earliest = statuses[-1]['id']
 			statuses.reverse()
 			for status in statuses:
-				self.onAddStatus.emit(status, self.timelineModel)
+				self.onAddStatus.emit(status, self.timelineModel, False)
+		self.onDoneWorking.emit()
+
+
+	def fetchMore(self):
+		self.rootObject.startWorking()
+		thread = threading.Thread(target=self._fetchMore)
+		thread.start()
+
+
+	def _fetchMore(self):
+		statuses = self.statusNet.statuses_home_timeline(max_id=self.earliest-1, count=20)
+		if len(statuses) > 0:
+			if self.earliest == None or self.earliest > statuses[-1]['id']:
+				self.earliest = statuses[-1]['id']
+			for status in statuses:
+				self.onAddStatus.emit(status, self.timelineModel, True)
 		self.onDoneWorking.emit()
 
 
@@ -98,12 +118,15 @@ class StatusNetMeego(QtCore.QObject):
 		self.rootObject.stopWorking()
 
 
-	def addStatus(self, status, model):
+	def addStatus(self, status, model, addToEnd=False):
 		self.statuses[status['id']] = status
 		icon = statusnetutils.getAvatar(status['user']['profile_image_url'], self.cacheDir)
 		creationtime = statusnetutils.getTime(status['created_at'])
 		status = Status(status['user']['name'], status['text'], icon, status['id'], status['statusnet_conversation_id'], creationtime.strftime("%c"))
-		model.add(status)
+		if addToEnd:
+			model.addToEnd(status)
+		else:
+			model.add(status)
 
 
 	def showStatus(self, statusid, conversationid):
@@ -121,7 +144,7 @@ class StatusNetMeego(QtCore.QObject):
 	def _showStatus(self, status, conversationid, conversationModel):
 		conversation = self.statusNet.statusnet_conversation(conversationid)
 		for status in conversation:
-			self.onAddStatus.emit(status, conversationModel)
+			self.onAddStatus.emit(status, conversationModel, False)
 		self.onDoneWorking.emit()
 
 	
@@ -216,6 +239,12 @@ class TimelineModel(QtCore.QAbstractListModel):
 		self._data.insert(0, status)
 		self.endInsertRows() #notify view that change happened
 
+
+	def addToEnd(self, status):
+		count = len(self._data)
+		self.beginInsertRows(QtCore.QModelIndex(), count, count)
+		self._data.insert(count, status)
+		self.endInsertRows()
 
 
 if __name__ == "__main__":

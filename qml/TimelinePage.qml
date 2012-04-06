@@ -13,6 +13,23 @@ Page {
 		spacing: 10;
 		model: timelineModel;
 		delegate: statusDelegate;
+		footer: Rectangle { 
+				id: fetchButton;
+				width: parent.width;
+				color: "#000";
+				height: 64;
+				visible: rootWin.showFetch;
+				Label {
+					text: "Fetch more...";
+					anchors.centerIn: parent;
+				}
+				MouseArea {
+					anchors.fill: parent;
+					onClicked: {
+						rootWin.fetchMore();
+					}
+				}
+			}
 	}
 
 	Component {

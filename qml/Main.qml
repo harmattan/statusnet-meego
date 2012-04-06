@@ -4,6 +4,7 @@ import com.nokia.meego 1.0;
 PageStackWindow {
 	id: rootWin;
 	property int pageMargin: 16;
+	property bool showFetch: true;
 
 	Component.onCompleted: {
 		theme.inverted = true;
@@ -11,6 +12,7 @@ PageStackWindow {
 
 	signal back();
 	signal refresh();
+	signal fetchMore();
 	signal send(string message);
 	signal selectMessage(int statusid, int conversationid);
 
@@ -41,11 +43,13 @@ PageStackWindow {
 	function showBack() {
 		backIcon.visible = true;
 		menuIcon.visible = false;
+		rootWin.showFetch = false;
 	}
 
 	function hideBack() {
 		backIcon.visible = false;
 		menuIcon.visible = true;
+		rootWin.showFetch = true;
 	}
 
 	function openFile(file) {
