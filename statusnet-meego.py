@@ -20,10 +20,11 @@ from statusnet import StatusNet
 import statusnetutils
 from oauthkeys import oauth_consumer_keys, oauth_consumer_secrets 
 from PySide import QtCore, QtGui, QtDeclarative
-import sys, datetime, pprint, os, os.path, urllib2, gconf, signal, threading
+import dbus, dbus.service, dbus.mainloop, dbus.glib
+import sys, datetime, os, os.path, urllib2, gconf, signal, threading
 
 
-class StatusNetMeego(QtCore.QObject):
+class Signals(QtCore.QObject):
 
 
 	onAddStatus = QtCore.Signal(list, QtCore.QAbstractListModel, bool)
@@ -31,11 +32,21 @@ class StatusNetMeego(QtCore.QObject):
 
 
 	def __init__(self, parent=None):
-		super(StatusNetMeego, self).__init__(parent)
+		super(Signals, self).__init__(parent)
+
+
+class StatusNetMeego(dbus.service.Object):
+
+
+	def __init__(self):
 		self.app = QtGui.QApplication(sys.argv)
 		self.app.setApplicationName("StatusNet")
 		signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+		self.signals = Signals()
+
 		self.statuses = {}
+
 		self.client = gconf.client_get_default()
 		self.api_path = self.client.get_string('/apps/ControlPanel/Statusnet/api_path')
 		if not self.api_path:
@@ -56,10 +67,10 @@ class StatusNetMeego(QtCore.QObject):
 		if not os.path.exists(self.cacheDir):
 			os.mkdir(self.cacheDir)
 		self.timelineModel = TimelineModel()
-		self.onAddStatus.connect(self.addStatus)
-		self.onDoneWorking.connect(self.doneWorking)
+		self.signals.onAddStatus.connect(self.addStatus)
+		self.signals.onDoneWorking.connect(self.doneWorking)
 		self.view = QtDeclarative.QDeclarativeView()
-		self.view.setSource("qml/Main.qml")
+		self.view.setSource("/usr/share/statusnet-meego/qml/Main.qml")
 		self.rootObject = self.view.rootObject()
 		self.context = self.view.rootContext()
 		self.context.setContextProperty('timelineModel', self.timelineModel)
@@ -74,9 +85,14 @@ class StatusNetMeego(QtCore.QObject):
 		self.earliest = None
 		self.updateTimeline()
 		# Update every 10 minutes
-		timer = QtCore.QTimer(self)
+		timer = QtCore.QTimer(self.signals)
 		timer.timeout.connect(self.updateTimeline)
 		timer.start(600000)
+		dbus_main_loop = dbus.glib.DBusGMainLoop(set_as_default=True)
+		session_bus = dbus.SessionBus(dbus_main_loop)
+		bus_name = dbus.service.BusName("com.mikeasoft.statusnet.eventcallback", bus=session_bus)
+	        dbus.service.Object.__init__(self, object_path="/EventFeedService", bus_name=bus_name)
+
 		sys.exit(self.app.exec_())
 
 
@@ -94,8 +110,8 @@ class StatusNetMeego(QtCore.QObject):
 				self.earliest = statuses[-1]['id']
 			statuses.reverse()
 			for status in statuses:
-				self.onAddStatus.emit(status, self.timelineModel, False)
-		self.onDoneWorking.emit()
+				self.signals.onAddStatus.emit(status, self.timelineModel, False)
+		self.signals.onDoneWorking.emit()
 
 
 	def fetchMore(self):
@@ -110,8 +126,8 @@ class StatusNetMeego(QtCore.QObject):
 			if self.earliest == None or self.earliest > statuses[-1]['id']:
 				self.earliest = statuses[-1]['id']
 			for status in statuses:
-				self.onAddStatus.emit(status, self.timelineModel, True)
-		self.onDoneWorking.emit()
+				self.signals.onAddStatus.emit(status, self.timelineModel, True)
+		self.signals.onDoneWorking.emit()
 
 
 	def doneWorking(self):
@@ -133,7 +149,10 @@ class StatusNetMeego(QtCore.QObject):
 		self.rootObject.startWorking()
 		self.replyingTo = statusid
 		self.conversation = conversationid
-		status = self.statuses[statusid]
+		try:
+			status = self.statuses[statusid]
+		except:
+			status = self.statusNet.statuses_show(statusid)
 		self.rootObject.setStatusPlaceholder("Reply to %s..." % status['user']['name'])
 		conversationModel = TimelineModel()
 		self.context.setContextProperty('timelineModel', conversationModel)
@@ -144,8 +163,8 @@ class StatusNetMeego(QtCore.QObject):
 	def _showStatus(self, status, conversationid, conversationModel):
 		conversation = self.statusNet.statusnet_conversation(conversationid)
 		for status in conversation:
-			self.onAddStatus.emit(status, conversationModel, False)
-		self.onDoneWorking.emit()
+			self.signals.onAddStatus.emit(status, conversationModel, False)
+		self.signals.onDoneWorking.emit()
 
 	
 	def back(self):
@@ -167,6 +186,11 @@ class StatusNetMeego(QtCore.QObject):
 		except Exception, err:
 			self.rootObject.showMessage("Problem sending message", err.message)
 
+
+	@dbus.service.method("com.mikeasoft.statusnet.eventcallback")
+	def ReceiveActionData(self, statusid, conversationid):
+		self.rootObject.showBack()
+		self.showStatus(int(statusid), int(conversationid))
 
 
 class Status(QtCore.QObject):

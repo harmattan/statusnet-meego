@@ -37,7 +37,7 @@ bool StatusNetSyncFWPlugin::init() {
 	iProperties = iProfile.allNonStorageKeys();
 
 	// Register our refresh action
-	MRemoteAction action("com.thpinfo.meego.EventFeedService.statusnet", "/synchronize", "com.thpinfo.meego.EventFeedService.statusnet", "refresh");
+	MRemoteAction action("com.mikeasoft.statusnet", "/synchronize", "com.mikeasoft.statusnet", "refresh");
 	QDBusInterface interface("com.nokia.home.EventFeed", "/eventfeed", "com.nokia.home.EventFeed", QDBusConnection::sessionBus());
 	interface.call(QDBus::NoBlock, "addRefreshAction", action.toString());
 

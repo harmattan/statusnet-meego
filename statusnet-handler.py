@@ -22,20 +22,37 @@ from PySide.QtCore import QCoreApplication
 from PySide.QtGui import QDesktopServices
 from eventfeed import EventFeedService, EventFeedItem
 import statusnetutils
-import sys, datetime, pprint, os, os.path, urllib2, gconf
+import dbus, dbus.service, dbus.mainloop, dbus.glib
+import sys, datetime, os, os.path, urllib2, gconf, signal, threading
 
 
-class StatusNetHandler():
+class StatusNetHandler(dbus.service.Object):
 
 
 	def __init__(self):
+		dbus_main_loop = dbus.glib.DBusGMainLoop(set_as_default=True)
+		session_bus = dbus.SessionBus(dbus_main_loop)
+		bus_name = dbus.service.BusName("com.mikeasoft.statusnet", bus=session_bus)
+		dbus.service.Object.__init__(self, object_path="/synchronize", bus_name=bus_name)
+
 		self.app = QCoreApplication(sys.argv)
+		signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 		self.client = gconf.client_get_default()
 		self.api_path = self.client.get_string('/apps/ControlPanel/Statusnet/api_path')
 		self.latest = self.client.get_int('/apps/ControlPanel/Statusnet/latest')
+		self.eventService = EventFeedService('statusnet', 'StatusNet')
+		self.eventService.local_name = "com.mikeasoft.statusnet.eventcallback"
+		self.eventService.DEFAULT_INTF = "com.mikeasoft.statusnet.eventcallback"
 		if not self.api_path:
 			return
+		self.cacheDir = QDesktopServices.storageLocation(QDesktopServices.CacheLocation)
+		if not os.path.exists(self.cacheDir):
+			os.mkdir(self.cacheDir)
+		sys.exit(self.app.exec_())
+
+
+	def login(self):
 		if self.api_path in oauth_consumer_keys:
 			key = oauth_consumer_keys[self.api_path]
 			secret = oauth_consumer_secrets[self.api_path]
@@ -43,34 +60,34 @@ class StatusNetHandler():
 			oauth_token_secret = self.client.get_string("/apps/ControlPanel/Statusnet/oauth_token_secret")
 			self.statusNet = StatusNet(self.api_path, auth_type="oauth", consumer_key=key, consumer_secret=secret, oauth_token=oauth_token, oauth_token_secret=oauth_token_secret)
 		else:
-			self.username = self.client.get_string('/apps/ControlPanel/Statusnet/username')
-			self.password= self.client.get_string('/apps/ControlPanel/Statusnet/password')
-			self.statusNet = StatusNet(self.api_path, self.username, self.password)
+			username = self.client.get_string('/apps/ControlPanel/Statusnet/username')
+			password = self.client.get_string('/apps/ControlPanel/Statusnet/password')
+			self.statusNet = StatusNet(self.api_path, username, password)
 
-		self.cacheDir = QDesktopServices.storageLocation(QDesktopServices.CacheLocation)
-		if not os.path.exists(self.cacheDir):
-			os.mkdir(self.cacheDir)
-		self.eventService = EventFeedService('statusnet', 'StatusNet')
-		self.eventService.add_refresh_action()
-		self.updateTimeline()
+
+	@dbus.service.method("com.mikeasoft.statusnet")
+	def refresh(self):
+		thread = threading.Thread(target=self.updateTimeline)
+		thread.start()
 
 
 	def updateTimeline(self):
+		self.login()
 		statuses = self.statusNet.statuses_home_timeline(self.latest)
 		for status in statuses:
 			self.showStatus(status)
 		if len(statuses) > 0:
 			self.client.set_int('/apps/ControlPanel/Statusnet/latest', statuses[0]['id'])
+		self.app.exit()
 
 
 	def showStatus(self, status):
 		icon = statusnetutils.getAvatar(status['user']['profile_image_url'], self.cacheDir)
 		title = "%s on StatusNet" % status['user']['name']
-		# Strip out offset
 		creationtime = statusnetutils.getTime(status['created_at'])
 		item = EventFeedItem(icon, title, creationtime)
 		item.set_body(status['text'])
-		item.set_url(self.api_path.replace("/api", "/notice") + "/" + str(status['id']))
+		item.set_action_data(status['id'], status['statusnet_conversation_id'])
 		self.eventService.add_item(item)
 
 

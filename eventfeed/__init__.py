@@ -245,7 +245,3 @@ class EventFeedService(dbus.service.Object):
         self.event_feed.removeItemsBySourceName(self.source_name)
         # No need to remember action IDs, because all items were removed
         self.actions = {}
-
-    def add_refresh_action(self):
-        action = self.local_name + " " + self.DEFAULT_PATH + " " + self.DEFAULT_INTF 
-        self.event_feed.addRefreshAction(action)
