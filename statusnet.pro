@@ -51,7 +51,7 @@ eventfeedlib.path = /usr/share/statusnet-meego/eventfeed/
 eventfeedlib.files = eventfeed/*
 
 images.path = /usr/share/statusnet-meego/images/
-images.files = images/*
+images.files = images/*.png
 
 dbus.path = /usr/share/dbus-1/services/
 dbus.files = dbus/*

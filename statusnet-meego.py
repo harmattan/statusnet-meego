@@ -71,6 +71,10 @@ class StatusNetMeego(QtCore.QObject):
 		self.view.showFullScreen()
 		self.latest = -1
 		self.updateTimeline()
+		# Update every 10 minutes
+		timer = QtCore.QTimer(self)
+		timer.timeout.connect(self.updateTimeline)
+		timer.start(600000)
 		sys.exit(self.app.exec_())
 
 
