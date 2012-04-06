@@ -27,6 +27,7 @@ def getTime(timestr):
 def getAvatar(url, cacheDir):
 	filename = url.split("/")[-1]
 	imagePath = os.path.join(cacheDir, filename)
+	imagePath = imagePath.replace("?", "")
 	if not os.path.exists(imagePath):
 		try:   
 			out = open(imagePath, 'wb')
