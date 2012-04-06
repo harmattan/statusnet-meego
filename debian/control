@@ -12,7 +12,9 @@ Depends: python-pyside.qtcore, python-pyside.qtgui, python-dbus, python-gconf, l
 Description: Receive updates from your friends on StatusNet services such as identi.ca.
  StatusNet is a federated free software microblogging platform. This
  app makes it possible for you to receive StatusNet updates in your
- events feed.
+ events feed, post updates, view conversations and reply to other people's
+ statuses.
+ .
  Please note that you will need to restart your phone before statuses
  will appear in your events feed.
 XB-Maemo-Display-Name: StatusNet for MeeGo
