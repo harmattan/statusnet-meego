@@ -190,6 +190,8 @@ class StatusNetMeego(dbus.service.Object):
 	@dbus.service.method("com.mikeasoft.statusnet.eventcallback")
 	def ReceiveActionData(self, statusid, conversationid):
 		self.rootObject.showBack()
+		self.view.activateWindow()
+		self.view.raise_()
 		self.showStatus(int(statusid), int(conversationid))
 
 
