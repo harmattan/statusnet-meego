@@ -30,6 +30,8 @@ class Signals(QtCore.QObject):
 
 	onAddStatus = QtCore.Signal(list, QtCore.QAbstractListModel, bool)
 	onDoneWorking = QtCore.Signal()
+	onDoneSending = QtCore.Signal()
+	onError = QtCore.Signal(str, str)
 
 
 	def __init__(self, parent=None):
@@ -47,6 +49,7 @@ class StatusNetMeego(dbus.service.Object):
 		self.signals = Signals()
 
 		self.statuses = {}
+		self.replyingTo = None
 
 		self.client = gconf.client_get_default()
 		self.api_path = self.client.get_string('/apps/ControlPanel/Statusnet/api_path')
@@ -65,6 +68,8 @@ class StatusNetMeego(dbus.service.Object):
 		self.timelineModel = TimelineModel()
 		self.signals.onAddStatus.connect(self.addStatus)
 		self.signals.onDoneWorking.connect(self.doneWorking)
+		self.signals.onDoneSending.connect(self.doneSending)
+		self.signals.onError.connect(self.error)
 		self.view = QtDeclarative.QDeclarativeView()
 		self.view.setSource("/usr/share/statusnet-meego/qml/Main.qml")
 		self.rootObject = self.view.rootObject()
@@ -172,7 +177,7 @@ class StatusNetMeego(dbus.service.Object):
 		self.rootObject.setStatusPlaceholder("Reply to %s..." % status['user']['name'])
 		conversationModel = TimelineModel()
 		self.context.setContextProperty('timelineModel', conversationModel)
-		thread = threading.Thread(target=self._showStatus, args=(status,conversationid,conversationModel))
+		thread = threading.Thread(target=self._showStatus, args=(status, conversationid, conversationModel))
 		thread.start()
 
 
@@ -191,16 +196,33 @@ class StatusNetMeego(dbus.service.Object):
 
 
 	def send(self, status):
+		self.rootObject.startWorking()
+		thread = threading.Thread(target=self._send, args=(status,))
+		thread.start()
+
+
+	def _send(self, status):
 		try:
 			if self.replyingTo:
 				self.statusNet.statuses_update(status, in_reply_to_status_id=self.replyingTo)
-				self.showStatus(self.replyingTo, self.conversation)
 			else:
 				self.statusNet.statuses_update(status)
-				self.updateTimeline()
-			self.rootObject.clearStatus()
+			self.signals.onDoneSending.emit()
 		except Exception, err:
-			self.rootObject.showMessage("Problem sending message", err.message)
+			self.signals.onError.emit("Problem sending message", err.message)
+			self.signals.onDoneWorking.emit()
+
+
+	def doneSending(self):
+		if self.replyingTo:
+			self.showStatus(self.replyingTo, self.conversation)
+		else:
+			self.updateTimeline()
+		self.rootObject.clearStatus()
+
+
+	def error(self, title, message):
+		self.rootObject.showMessage(title, message)
 
 
 	@dbus.service.method("com.mikeasoft.statusnet.eventcallback")
