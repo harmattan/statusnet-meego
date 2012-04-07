@@ -1,5 +1,5 @@
 Source: statusnet-meego
-Section: user/Other
+Section: user/network
 Priority: extra
 Maintainer: Michael Sheldon <elleo@gnu.org>
 Build-Depends: debhelper (>= 7), dpatch, libqt4-dev, sync-app-dev, sync-fw-dev, libmeegotouchevents-dev
