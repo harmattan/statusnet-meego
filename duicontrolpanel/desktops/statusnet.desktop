@@ -4,7 +4,7 @@ Name=StatusNet
 X-logical-id=statusnet
 X-translation-catalog=statusnet
 Icon=/usr/share/icons/hicolor/80x80/apps/statusnet.png
-Exec=/usr/bin/invoker --type=e -s /usr/share/statusnet-meego/statusnet-login.py
+Exec=/usr/bin/invoker --type=e -s /opt/statusnet-meego/statusnet-login.py
 
 X-Maemo-Service=com.nokia.DuiControlPanel
 X-Maemo-Method=com.nokia.DuiControlPanelIf.appletPage

@@ -54,7 +54,7 @@ class StatusNetMeego(dbus.service.Object):
 		self.client = gconf.client_get_default()
 		self.api_path = self.client.get_string('/apps/ControlPanel/Statusnet/api_path')
 		if not self.api_path:
-			ret = subprocess.call(["/usr/bin/invoker", "--type=e", "-s", "/usr/share/statusnet-meego/statusnet-login.py"])
+			ret = subprocess.call(["/usr/bin/invoker", "--type=e", "-s", "/opt/statusnet-meego/statusnet-login.py"])
 			if ret == 2:
 				self.api_path = self.client.get_string('/apps/ControlPanel/Statusnet/api_path')
 			else:
@@ -71,7 +71,7 @@ class StatusNetMeego(dbus.service.Object):
 		self.signals.onDoneSending.connect(self.doneSending)
 		self.signals.onError.connect(self.error)
 		self.view = QtDeclarative.QDeclarativeView()
-		self.view.setSource("/usr/share/statusnet-meego/qml/Main.qml")
+		self.view.setSource("/opt/statusnet-meego/qml/Main.qml")
 		self.rootObject = self.view.rootObject()
 		self.context = self.view.rootContext()
 		self.context.setContextProperty('timelineModel', self.timelineModel)
@@ -110,7 +110,7 @@ class StatusNetMeego(dbus.service.Object):
 				password= self.client.get_string('/apps/ControlPanel/Statusnet/password')
 				self.statusNet = StatusNet(self.api_path, username, password)
 		except:
-			ret = subprocess.call(["/usr/bin/invoker", "--type=e", "-s", "/usr/share/statusnet-meego/statusnet-login.py"])
+			ret = subprocess.call(["/usr/bin/invoker", "--type=e", "-s", "/opt/statusnet-meego/statusnet-login.py"])
 			if ret == 2:
 				self.login()
 			else:

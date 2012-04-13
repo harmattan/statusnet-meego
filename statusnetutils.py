@@ -34,5 +34,5 @@ def getAvatar(url, cacheDir):
 			out.write(urllib2.urlopen(url).read())
 			out.close()
 		except Exception, err:
-			return "/usr/share/statusnet-meego/images/statusnet.png"
+			return "/opt/statusnet-meego/images/statusnet.png"
 	return imagePath

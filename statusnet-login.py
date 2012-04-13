@@ -33,7 +33,7 @@ class StatusNetLogin():
 		signal.signal(signal.SIGINT, signal.SIG_DFL)
 		self.client = gconf.client_get_default()
 		self.view = QtDeclarative.QDeclarativeView()
-		self.view.setSource("/usr/share/statusnet-meego/qml/Configuration.qml")
+		self.view.setSource("/opt/statusnet-meego/qml/Configuration.qml")
 		self.rootObject = self.view.rootObject()
 		self.rootObject.setApiPath(self.client.get_string("/apps/ControlPanel/Statusnet/api_path"))
 		self.rootObject.setUsername(self.client.get_string("/apps/ControlPanel/Statusnet/username"))

@@ -1,3 +1,17 @@
+statusnet-meego (0.2-4) unstable; urgency=low
+
+  * Optify for Nokia store
+  * Change category to Internet
+  * Fix homepage URL
+
+ -- Michael Sheldon <elleo@gnu.org>  Thu, 12 Apr 2012 22:03:46 +0100
+
+statusnet-meego (0.2-3) unstable; urgency=low
+
+  * Fix missing dependency on python-pyside.qtdeclarative
+
+ -- Michael Sheldon <elleo@gnu.org>  Mon, 09 Apr 2012 23:07:34 +0100
+
 statusnet-meego (0.2-2) unstable; urgency=low
 
   * Fix packaging ready for apps for meego submission

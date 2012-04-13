@@ -53,7 +53,7 @@ Page {
 				height: statusDelegateAvatar.height;
 				width: statusDelegateAvatar.width;
 				smooth: true;
-				source: "file:///usr/share/statusnet-meego/images/avatarborder.png";
+				source: "file:///opt/statusnet-meego/images/avatarborder.png";
 			}
 
 			Label {
