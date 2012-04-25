@@ -198,7 +198,7 @@ class StatusNetMeego(dbus.service.Object):
 
 	def send(self, status):
 		self.rootObject.startWorking()
-		thread = threading.Thread(target=self._send, args=(status,))
+		thread = threading.Thread(target=self._send, args=(status.encode("utf-8"),))
 		thread.start()
 
 
