@@ -16,6 +16,7 @@ PageStackWindow {
 	signal fetchMore();
 	signal send(string message);
 	signal selectMessage(int statusid, int conversationid);
+	signal linkClicked(string link);
 
 	function showMessage(title, message) {
 		messageDialog.titleText = title;

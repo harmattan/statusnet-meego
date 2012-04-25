@@ -81,6 +81,7 @@ class StatusNetMeego(dbus.service.Object):
 		self.rootObject.refresh.connect(self.updateTimeline)
 		self.rootObject.fetchMore.connect(self.fetchMore)
 		self.rootObject.selectMessage.connect(self.showStatus)
+		self.rootObject.linkClicked.connect(self.openLink)
 		self.view.showFullScreen()
 		self.latest = -1
 		self.earliest = None
@@ -159,7 +160,7 @@ class StatusNetMeego(dbus.service.Object):
 		self.statuses[status['id']] = status
 		icon = statusnetutils.getAvatar(status['user']['profile_image_url'], self.cacheDir)
 		creationtime = statusnetutils.getTime(status['created_at'])
-		status = Status(status['user']['name'], status['text'], icon, status['id'], status['statusnet_conversation_id'], creationtime.strftime("%c"))
+		status = Status(status['user']['name'], status['statusnet_html'].replace("<a ", "<a style='color: #a0a0a0;' "), icon, status['id'], status['statusnet_conversation_id'], creationtime.strftime("%c"))
 		if addToEnd:
 			model.addToEnd(status)
 		else:
@@ -223,6 +224,10 @@ class StatusNetMeego(dbus.service.Object):
 
 	def error(self, title, message):
 		self.rootObject.showMessage(title, message)
+
+
+	def openLink(self, link):
+		QtGui.QDesktopServices.openUrl(link)
 
 
 	@dbus.service.method("com.mikeasoft.statusnet.eventcallback")

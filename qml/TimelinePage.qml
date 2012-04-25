@@ -75,6 +75,9 @@ Page {
 				anchors.left: statusDelegateAvatar.right;
 				anchors.leftMargin: 16;
 				text: model.text;
+				onLinkActivated: {
+					rootWin.linkClicked(link);
+				}
 			}
 
 			Label {
@@ -90,6 +93,7 @@ Page {
 
 			MouseArea {
 				anchors.fill: parent;
+				z: -1;
 				onClicked: {
 					rootWin.selectMessage(model.statusid, model.conversationid);
 					rootWin.showBack();
