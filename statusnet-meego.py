@@ -160,7 +160,8 @@ class StatusNetMeego(dbus.service.Object):
 		self.statuses[status['id']] = status
 		icon = statusnetutils.getAvatar(status['user']['profile_image_url'], self.cacheDir)
 		creationtime = statusnetutils.getTime(status['created_at'])
-		status = Status(status['user']['name'], status['statusnet_html'].replace("<a ", "<a style='color: #a0a0a0;' "), icon, status['id'], status['statusnet_conversation_id'], creationtime.strftime("%c"))
+		html = status['statusnet_html'].replace("<a ", "<a style='color: #a0a0a0;' ")
+		status = Status(status['user']['name'], html, icon, status['id'], status['statusnet_conversation_id'], creationtime.strftime("%c"))
 		if addToEnd:
 			model.addToEnd(status)
 		else:
