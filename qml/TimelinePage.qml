@@ -45,6 +45,8 @@ Page {
 				anchors.left: parent.left;
 				smooth: true;
 				source: model.avatar;
+				height: 48;
+				width: 48;
 			}
 
 			Image {
