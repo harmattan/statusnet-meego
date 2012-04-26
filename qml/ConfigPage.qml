@@ -51,11 +51,20 @@ Page {
 		anchors.centerIn: parent;
 		width: 440;
 
-		Button {
-			text: serverSelection.model.get(serverSelection.selectedIndex).name;
+		Column {
 			width: parent.width;
-			onClicked: {
-				serverSelection.open();
+			spacing: 10;
+
+			Label {
+				text: "Service:";
+			}
+
+			Button {
+				text: serverSelection.model.get(serverSelection.selectedIndex).name;
+				width: parent.width;
+				onClicked: {
+					serverSelection.open();
+				}
 			}
 		}
 
