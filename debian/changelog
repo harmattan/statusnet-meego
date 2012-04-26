@@ -1,3 +1,10 @@
+statusnet-meego (0.2.1-1) unstable; urgency=low
+
+  * Make URLs clickable
+  * Fix UTF-8 posts
+
+ -- Michael Sheldon <elleo@gnu.org>  Thu, 26 Apr 2012 00:52:02 +0100
+
 statusnet-meego (0.2-4) unstable; urgency=low
 
   * Optify for Nokia store
