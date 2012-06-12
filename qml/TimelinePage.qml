@@ -60,13 +60,21 @@ Page {
 
 			Label {
 				id: statusDelegateTitle;
-				width: parent.width - statusDelegateAvatar.width - 20;
+				width: parent.width - statusDelegateAvatar.width - 20 - 32; 
 				font.bold: true;
 				font.pixelSize: 20;
 				anchors.top: statusDelegateAvatar.top;
 				anchors.left: statusDelegateAvatar.right;
 				anchors.leftMargin: 16;
 				text: model.title;
+			}
+
+			Image {
+				id: statusDelegateFavourite;
+				visible: model.favourite;
+				anchors.left: statusDelegateTitle.right;
+				anchors.top: statusDelegateTitle.top;
+				source: "file:///opt/statusnet-meego/images/favourite.png";
 			}
 
 			Label {
@@ -99,6 +107,31 @@ Page {
 				onClicked: {
 					rootWin.selectMessage(model.statusid, model.conversationid);
 					rootWin.showBack();
+				}
+				onPressAndHold: {
+					statusDelegateMenu.open();
+				}
+			}
+
+			Menu {
+				id: statusDelegateMenu
+				content: MenuLayout {
+
+					MenuItem {
+						text: "Repeat this message"
+						onClicked: rootWin.repeat(model.statusid);
+					}
+
+					MenuItem {
+						text: model.favourite ? "Unfavourite this message" : "Favourite this message"
+						onClicked: {
+							if (model.favourite) {
+								rootWin.unfavourite(model.statusid);
+							} else {
+								rootWin.favourite(model.statusid);
+							}
+						}
+					}
 				}
 			}
 		}

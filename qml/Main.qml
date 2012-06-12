@@ -6,6 +6,8 @@ PageStackWindow {
 	id: rootWin;
 	property int pageMargin: 16;
 	property bool showFetch: true;
+	property int currentMessage: -1;
+	property bool currentMessageFavourite: false;
 
 	Component.onCompleted: {
 		theme.inverted = true;
@@ -17,6 +19,9 @@ PageStackWindow {
 	signal send(string message);
 	signal selectMessage(int statusid, int conversationid);
 	signal linkClicked(string link);
+	signal repeat(int statusid);
+	signal favourite(int statusid);
+	signal unfavourite(int statusid);
 
 	function showMessage(title, message) {
 		messageDialog.titleText = title;

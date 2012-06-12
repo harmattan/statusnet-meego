@@ -31,6 +31,8 @@ class Signals(QtCore.QObject):
 	onAddStatus = QtCore.Signal(list, QtCore.QAbstractListModel, bool)
 	onDoneWorking = QtCore.Signal()
 	onDoneSending = QtCore.Signal()
+	onDoneMessage = QtCore.Signal(str, str, bool)
+	onDoneFavourite = QtCore.Signal(int, bool)
 	onError = QtCore.Signal(str, str)
 
 
@@ -49,6 +51,7 @@ class StatusNetMeego(dbus.service.Object):
 		self.signals = Signals()
 
 		self.statuses = {}
+		self.favourites = {}
 		self.replyingTo = None
 
 		self.client = gconf.client_get_default()
@@ -58,6 +61,7 @@ class StatusNetMeego(dbus.service.Object):
 			if ret == 2:
 				self.api_path = self.client.get_string('/apps/ControlPanel/Statusnet/api_path')
 			else:
+				# Quit if the user just closed the configuration applet without setting up login details
 				return
 
 		self.login()
@@ -69,6 +73,8 @@ class StatusNetMeego(dbus.service.Object):
 		self.signals.onAddStatus.connect(self.addStatus)
 		self.signals.onDoneWorking.connect(self.doneWorking)
 		self.signals.onDoneSending.connect(self.doneSending)
+		self.signals.onDoneMessage.connect(self.doneMessage)
+		self.signals.onDoneFavourite.connect(self.doneFavourite)
 		self.signals.onError.connect(self.error)
 		self.view = QtDeclarative.QDeclarativeView()
 		self.view.setSource("/opt/statusnet-meego/qml/Main.qml")
@@ -82,6 +88,9 @@ class StatusNetMeego(dbus.service.Object):
 		self.rootObject.fetchMore.connect(self.fetchMore)
 		self.rootObject.selectMessage.connect(self.showStatus)
 		self.rootObject.linkClicked.connect(self.openLink)
+		self.rootObject.favourite.connect(self.favourite)
+		self.rootObject.unfavourite.connect(self.unfavourite)
+		self.rootObject.repeat.connect(self.repeat)
 		self.view.showFullScreen()
 		self.latest = -1
 		self.earliest = None
@@ -162,7 +171,7 @@ class StatusNetMeego(dbus.service.Object):
 		creationtime = statusnetutils.getTime(status['created_at'])
 		html = status['statusnet_html'].replace("<a ", "<a style='color: #a0a0a0;' ")
 		html = html.replace("&quot;", '"')
-		status = Status(status['user']['name'], html, icon, status['id'], status['statusnet_conversation_id'], creationtime.strftime("%c"))
+		status = Status(status['user']['name'], html, icon, status['id'], status['statusnet_conversation_id'], creationtime.strftime("%c"), status['favorited'])
 		if addToEnd:
 			model.addToEnd(status)
 		else:
@@ -232,6 +241,65 @@ class StatusNetMeego(dbus.service.Object):
 		QtGui.QDesktopServices.openUrl(link)
 
 
+	def favourite(self, statusid):
+		self.rootObject.startWorking()
+		thread = threading.Thread(target=self._favourite, args=(statusid,))
+		thread.start()
+
+
+	def _favourite(self, statusid):
+		try:
+			self.statusNet.favorites_create(statusid)
+			self.signals.onDoneFavourite.emit(statusid, True)
+		except Exception, err:
+			self.signals.onError.emit("Problem adding favourite", err.message)
+			self.signals.onDoneWorking.emit()
+
+
+	def doneFavourite(self, statusid, favourite):
+		idx = self.timelineModel.getIndex(statusid)
+		self.timelineModel.setData(idx, favourite, self.timelineModel.FAVOURITE_ROLE)
+		self.signals.onDoneWorking.emit()
+
+
+	def doneMessage(self, title, message, update):
+		if update:
+			self.updateTimeline()
+		else:
+			self.signals.onDoneWorking.emit()
+		self.rootObject.showMessage(title, message)
+
+
+	def unfavourite(self, statusid):
+		self.rootObject.startWorking()
+		thread = threading.Thread(target=self._unfavourite, args=(statusid,))
+		thread.start()
+
+
+	def _unfavourite(self, statusid):
+		try:
+			self.statusNet.favorites_destroy(statusid)
+			self.signals.onDoneFavourite.emit(statusid, False)
+		except Exception, err:
+			self.signals.onError.emit("Problem removing favourite", err.message)
+			self.signals.onDoneWorking.emit()
+
+
+	def repeat(self, statusid):
+		self.rootObject.startWorking()
+		thread = threading.Thread(target=self._repeat, args=(statusid,))
+		thread.start()
+
+
+	def _repeat(self, statusid):
+		try:
+			self.statusNet.statuses_retweet(statusid)
+			self.signals.onDoneMessage.emit("Message repeated", "The selected message was repeated successfully.", True)
+		except Exception, err:
+			self.signals.onError.emit("Problem repeating message", err.message)
+			self.signals.onDoneWorking.emit()
+
+
 	@dbus.service.method("com.mikeasoft.statusnet.eventcallback")
 	def ReceiveActionData(self, statusid, conversationid):
 		self.rootObject.showBack()
@@ -243,13 +311,14 @@ class StatusNetMeego(dbus.service.Object):
 class Status(QtCore.QObject):
 
 
-	def __init__(self, title, text, avatar, statusid, conversationid, time):
+	def __init__(self, title, text, avatar, statusid, conversationid, time, favourite):
 		self.title = title
 		self.text = text
 		self.avatar = avatar
 		self.statusid = statusid
 		self.conversationid = conversationid
 		self.time = time
+		self.favourite = favourite
 
 
 class TimelineModel(QtCore.QAbstractListModel):
@@ -261,6 +330,7 @@ class TimelineModel(QtCore.QAbstractListModel):
 	ID_ROLE = QtCore.Qt.UserRole + 4
 	CID_ROLE = QtCore.Qt.UserRole + 5
 	TIME_ROLE = QtCore.Qt.UserRole + 6
+	FAVOURITE_ROLE = QtCore.Qt.UserRole + 7
 
 
 	def __init__(self, parent=None):
@@ -273,6 +343,7 @@ class TimelineModel(QtCore.QAbstractListModel):
 		keys[TimelineModel.ID_ROLE] = 'statusid'
 		keys[TimelineModel.CID_ROLE] = 'conversationid'
 		keys[TimelineModel.TIME_ROLE] = 'time'
+		keys[TimelineModel.FAVOURITE_ROLE] = 'favourite'
 		self.setRoleNames(keys)
 
 
@@ -281,12 +352,6 @@ class TimelineModel(QtCore.QAbstractListModel):
 
 
 	def data(self, index, role):
-		 if not index.isValid():
-			 return None
-
-		 if index.row() > len(self._data):
-			 return None
-
 		 status = self._data[index.row()]
 
 		 if role == TimelineModel.TITLE_ROLE:
@@ -301,6 +366,8 @@ class TimelineModel(QtCore.QAbstractListModel):
 			 return status.conversationid
 		 elif role == TimelineModel.TIME_ROLE:
 			 return status.time
+		 elif role == TimelineModel.FAVOURITE_ROLE:
+			 return status.favourite
 		 else:
 			 return None
 
@@ -315,6 +382,27 @@ class TimelineModel(QtCore.QAbstractListModel):
 		count = len(self._data)
 		self.beginInsertRows(QtCore.QModelIndex(), count, count)
 		self._data.insert(count, status)
+		self.endInsertRows()
+
+
+	def getIndex(self, statusid):
+		for status in self._data:
+			if status.statusid == statusid:
+				return self._data.index(status)
+
+		return None
+
+
+	def setData(self, index, value, role):
+		# dataChanged signal isn't obeyed by ListView (QTBUG-13664)
+		# so work around it by removing then re-adding rows
+		self.beginRemoveRows(QtCore.QModelIndex(), index, index)
+		status = self._data.pop(index)
+		self.endRemoveRows()
+		self.beginInsertRows(QtCore.QModelIndex(), index, index)
+		if role == TimelineModel.FAVOURITE_ROLE:
+			status.favourite = value
+		self._data.insert(index, status)
 		self.endInsertRows()
 
 

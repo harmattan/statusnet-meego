@@ -1,5 +1,4 @@
 import QtQuick 1.1;
-import QtWebKit 1.0;
 import com.nokia.meego 1.0;
 
 Page {
