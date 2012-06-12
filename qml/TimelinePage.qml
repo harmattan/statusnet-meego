@@ -115,6 +115,7 @@ Page {
 
 			Menu {
 				id: statusDelegateMenu
+				anchors.bottomMargin: commonTools.height;
 				content: MenuLayout {
 
 					MenuItem {
