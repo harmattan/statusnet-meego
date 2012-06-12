@@ -74,7 +74,10 @@ Page {
 				visible: model.favourite;
 				anchors.left: statusDelegateTitle.right;
 				anchors.top: statusDelegateTitle.top;
-				source: "file:///opt/statusnet-meego/images/favourite.png";
+				source: "image://theme/icon-s-common-favorite-mark-inverse";
+				smooth: true;
+				height: 28;
+				width: 28;
 			}
 
 			Label {
