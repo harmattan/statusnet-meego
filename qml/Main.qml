@@ -88,6 +88,11 @@ PageStackWindow {
 				text: "About"
 				onClicked: rootWin.showMessage("StatusNet for MeeGo", "Author: Mike Sheldon (elleo@gnu.org)\n\nLicense: GPL 3.0 or later\n\nFeel free to follow me, @mikesheldon, on identi.ca if you think you need more friends :)")
 			}
+
+			MenuItem {
+				text: "Privacy Policy"
+				onClicked: rootWin.showMessage("Privacy Policy", "This application stores information required for authenticating with third party services (either in the form of a username and password, or an OAuth token). This information is only ever transmitted to the services you have authorised. The application also sends messages to users on these services (at your request), these messages are never stored permanently by the application and are only sent directly to the services you have authorised.");
+			}
 		}
 	}
 

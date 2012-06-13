@@ -4,6 +4,7 @@ import com.nokia.meego 1.0;
 Page {
 	id: configPage;
 	anchors.margins: rootWin.pageMargin;
+	tools: commonTools;
 
 	Component.onCompleted: {
 		if (rootWin.api_path == "https://identi.ca/api") {
