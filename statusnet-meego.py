@@ -33,6 +33,7 @@ class Signals(QtCore.QObject):
 	onDoneSending = QtCore.Signal()
 	onDoneMessage = QtCore.Signal(str, str, bool)
 	onDoneFavourite = QtCore.Signal(int, bool)
+	onUpdateFollowing = QtCore.Signal(int, bool)
 	onError = QtCore.Signal(str, str)
 
 
@@ -75,6 +76,7 @@ class StatusNetMeego(dbus.service.Object):
 		self.signals.onDoneSending.connect(self.doneSending)
 		self.signals.onDoneMessage.connect(self.doneMessage)
 		self.signals.onDoneFavourite.connect(self.doneFavourite)
+		self.signals.onUpdateFollowing.connect(self.updateFollowing)
 		self.signals.onError.connect(self.error)
 		self.view = QtDeclarative.QDeclarativeView()
 		self.view.setSource("/opt/statusnet-meego/qml/Main.qml")
@@ -90,6 +92,8 @@ class StatusNetMeego(dbus.service.Object):
 		self.rootObject.linkClicked.connect(self.openLink)
 		self.rootObject.favourite.connect(self.favourite)
 		self.rootObject.unfavourite.connect(self.unfavourite)
+		self.rootObject.follow.connect(self.follow)
+		self.rootObject.unfollow.connect(self.unfollow)
 		self.rootObject.repeat.connect(self.repeat)
 		self.view.showFullScreen()
 		self.latest = -1
@@ -171,7 +175,7 @@ class StatusNetMeego(dbus.service.Object):
 		creationtime = statusnetutils.getTime(status['created_at'])
 		html = status['statusnet_html'].replace("<a ", "<a style='color: #a0a0a0;' ")
 		html = html.replace("&quot;", '"')
-		status = Status(status['user']['name'], html, icon, status['id'], status['statusnet_conversation_id'], creationtime.strftime("%c"), status['favorited'])
+		status = Status(status['user']['name'], html, icon, status['id'], status['statusnet_conversation_id'], creationtime.strftime("%c"), status['favorited'], status['user']['following'], status['user']['id'])
 		if addToEnd:
 			model.addToEnd(status)
 		else:
@@ -262,6 +266,42 @@ class StatusNetMeego(dbus.service.Object):
 		self.signals.onDoneWorking.emit()
 
 
+	def follow(self, userid, username):
+		self.rootObject.startWorking()
+		thread = threading.Thread(target=self._follow, args=(userid, username))
+		thread.start()
+
+
+	def _follow(self, userid, username):
+		try:
+			self.statusNet.friendships_create(userid)
+			self.signals.onDoneMessage.emit("Following new user", "You've started following %s." % username, False)
+			self.signals.onUpdateFollowing.emit(userid, True)
+		except Exception, err:
+			self.signals.onError.emit("Problem following user", err.message)
+			self.signals.onDoneWorking.emit()
+
+
+	def unfollow(self, userid, username):
+		self.rootObject.startWorking()
+		thread = threading.Thread(target=self._unfollow, args=(userid, username))
+		thread.start()
+
+
+	def _unfollow(self, userid, username):
+		try:
+			self.statusNet.friendships_destroy(userid)
+			self.signals.onDoneMessage.emit("Stopped following user", "You've stopped following %s." % username, False)
+			self.signals.onUpdateFollowing.emit(userid, False)
+		except Exception, err:
+			self.signals.onError.emit("Problem stopping following user", err.message)
+			self.signals.onDoneWorking.emit()
+
+
+	def updateFollowing(self, userid, following):
+		self.timelineModel.updateFollowing(userid, following)
+
+
 	def doneMessage(self, title, message, update):
 		if update:
 			self.updateTimeline()
@@ -311,7 +351,7 @@ class StatusNetMeego(dbus.service.Object):
 class Status(QtCore.QObject):
 
 
-	def __init__(self, title, text, avatar, statusid, conversationid, time, favourite):
+	def __init__(self, title, text, avatar, statusid, conversationid, time, favourite, following, userid):
 		self.title = title
 		self.text = text
 		self.avatar = avatar
@@ -319,6 +359,8 @@ class Status(QtCore.QObject):
 		self.conversationid = conversationid
 		self.time = time
 		self.favourite = favourite
+		self.following = following
+		self.userid = userid
 
 
 class TimelineModel(QtCore.QAbstractListModel):
@@ -331,6 +373,8 @@ class TimelineModel(QtCore.QAbstractListModel):
 	CID_ROLE = QtCore.Qt.UserRole + 5
 	TIME_ROLE = QtCore.Qt.UserRole + 6
 	FAVOURITE_ROLE = QtCore.Qt.UserRole + 7
+	FOLLOWING_ROLE = QtCore.Qt.UserRole + 8
+	USERID_ROLE = QtCore.Qt.UserRole + 9
 
 
 	def __init__(self, parent=None):
@@ -344,6 +388,8 @@ class TimelineModel(QtCore.QAbstractListModel):
 		keys[TimelineModel.CID_ROLE] = 'conversationid'
 		keys[TimelineModel.TIME_ROLE] = 'time'
 		keys[TimelineModel.FAVOURITE_ROLE] = 'favourite'
+		keys[TimelineModel.FOLLOWING_ROLE] = 'following'
+		keys[TimelineModel.USERID_ROLE] = 'userid'
 		self.setRoleNames(keys)
 
 
@@ -352,24 +398,28 @@ class TimelineModel(QtCore.QAbstractListModel):
 
 
 	def data(self, index, role):
-		 status = self._data[index.row()]
+		status = self._data[index.row()]
 
-		 if role == TimelineModel.TITLE_ROLE:
-			 return status.title
-		 elif role == TimelineModel.TEXT_ROLE:
-			 return status.text
-		 elif role == TimelineModel.AVATAR_ROLE:
-			 return status.avatar
-		 elif role == TimelineModel.ID_ROLE:
-			 return status.statusid
-		 elif role == TimelineModel.CID_ROLE:
-			 return status.conversationid
-		 elif role == TimelineModel.TIME_ROLE:
-			 return status.time
-		 elif role == TimelineModel.FAVOURITE_ROLE:
-			 return status.favourite
-		 else:
-			 return None
+		if role == TimelineModel.TITLE_ROLE:
+			return status.title
+		elif role == TimelineModel.TEXT_ROLE:
+			return status.text
+		elif role == TimelineModel.AVATAR_ROLE:
+			return status.avatar
+		elif role == TimelineModel.ID_ROLE:
+			return status.statusid
+		elif role == TimelineModel.CID_ROLE:
+			return status.conversationid
+		elif role == TimelineModel.TIME_ROLE:
+			return status.time
+		elif role == TimelineModel.FAVOURITE_ROLE:
+			return status.favourite
+		elif role == TimelineModel.FOLLOWING_ROLE:
+			return status.following
+		elif role == TimelineModel.USERID_ROLE:
+			return status.userid
+		else:
+			return None
 
 
 	def add(self, status):
@@ -393,6 +443,13 @@ class TimelineModel(QtCore.QAbstractListModel):
 		return None
 
 
+	def updateFollowing(self, userid, following):
+		for status in self._data:
+			if status.userid == userid:
+				idx = self._data.index(status)
+				self.setData(idx, following, TimelineModel.FOLLOWING_ROLE)
+
+
 	def setData(self, index, value, role):
 		# dataChanged signal isn't obeyed by ListView (QTBUG-13664)
 		# so work around it by removing then re-adding rows
@@ -402,6 +459,8 @@ class TimelineModel(QtCore.QAbstractListModel):
 		self.beginInsertRows(QtCore.QModelIndex(), index, index)
 		if role == TimelineModel.FAVOURITE_ROLE:
 			status.favourite = value
+		elif role == TimelineModel.FOLLOWING_ROLE:
+			status.following = value
 		self._data.insert(index, status)
 		self.endInsertRows()
 

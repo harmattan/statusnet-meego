@@ -9,6 +9,8 @@ PageStackWindow {
 	property int currentStatus: -1;
 	property bool currentStatusFavourite: false;
 	property bool currentStatusFollowing: false;
+	property int currentUserId: -1;
+	property string currentUsername;
 
 	Component.onCompleted: {
 		theme.inverted = true;
@@ -23,6 +25,8 @@ PageStackWindow {
 	signal repeat(int statusid);
 	signal favourite(int statusid);
 	signal unfavourite(int statusid);
+	signal follow(int userid, string username);
+	signal unfollow(int userid, string username);
 
 	function showMessage(title, message) {
 		messageDialog.titleText = title;

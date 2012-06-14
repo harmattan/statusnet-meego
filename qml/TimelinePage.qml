@@ -112,9 +112,11 @@ Page {
 					rootWin.showBack();
 				}
 				onPressAndHold: {
-					rootWin.currentStatus = model.statusid
-					rootWin.currentStatusFavourite = model.favourite
-					rootWin.currentStatusFollowing = model.following
+					rootWin.currentStatus = model.statusid;
+					rootWin.currentStatusFavourite = model.favourite;
+					rootWin.currentStatusFollowing = model.following;
+					rootWin.currentUsername = model.title;
+					rootWin.currentUserId = model.userid;
 					statusMenu.open();
 				}
 			}
@@ -146,6 +148,13 @@ Page {
 
 			MenuItem {
 				text: rootWin.currentStatusFollowing ? "Unfollow this user" : "Follow this user"
+				onClicked: {
+					if (rootWin.currentStatusFollowing) {
+						rootWin.unfollow(rootWin.currentUserId, rootWin.currentUsername);
+					} else {
+						rootWin.follow(rootWin.currentUserId, rootWin.currentUsername);
+					}
+				}
 			}
 		}
 	}
