@@ -82,6 +82,9 @@ class StatusNetHandler(dbus.service.Object):
 
 
 	def showStatus(self, status):
+		if status['text'] == None:
+			# HTML only message
+			return
 		icon = statusnetutils.getAvatar(status['user']['profile_image_url'], self.cacheDir)
 		title = "%s on StatusNet" % status['user']['name']
 		creationtime = statusnetutils.getTime(status['created_at'])
