@@ -4,6 +4,11 @@ import com.nokia.meego 1.0;
 Page {
 	id: oauthPage;
 	anchors.margins: rootWin.pageMargin;
+	tools: commonTools;
+
+	Component.onCompleted: {
+		rootWin.showBack();
+	}
 
 	Column {
 		spacing: 10;

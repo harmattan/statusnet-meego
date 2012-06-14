@@ -17,6 +17,7 @@ PageStackWindow {
 	signal login(string api_path, string username, string password);
 	signal oauthLogin(string api_path);
 	signal oauthDone(string verified);
+	signal register();
 
 	function setUsername(newUsername) {
 		username = newUsername;
@@ -32,6 +33,11 @@ PageStackWindow {
 
 	function setURL(newURL) {
 		url = newURL;
+	}
+
+	function showBack() {
+		menuIcon.visible = false;
+		backButton.visible = true;
 	}
 
 	function showMessage(title, message) {
@@ -73,7 +79,8 @@ PageStackWindow {
 			iconId: "toolbar-back";
 			onClicked: {
 				pageStack.pop();
-				pause();
+				backButton.visible = false;
+				menuIcon.visible = true;
 			}
 		}
 

@@ -40,6 +40,7 @@ class StatusNetLogin():
 		self.rootObject.setPassword(self.client.get_string("/apps/ControlPanel/Statusnet/password"))
 		self.rootObject.openFile("ConfigPage.qml")
 		self.rootObject.login.connect(self.login)
+		self.rootObject.register.connect(self.register)
 		self.rootObject.oauthLogin.connect(self.oauthLogin)
 		self.rootObject.oauthDone.connect(self.oauthDone)
 		self.view.showFullScreen()
@@ -95,6 +96,10 @@ class StatusNetLogin():
 		except:
 			self.rootObject.showMessage("Login failed", e.message)
 			self.rootObject.openFile("ConfigPage.qml")
+
+
+	def register(self):
+		QtGui.QDesktopServices.openUrl("https://identi.ca/main/register")
 
 
 	def success(self):
