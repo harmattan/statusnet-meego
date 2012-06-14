@@ -1,3 +1,15 @@
+statusnet-meego (0.3-1) unstable; urgency=low
+
+  * Add ability to repeat messages
+  * Make it possible to favourite and unfavourite messages
+  * Make it possible to follow and unfollow users
+  * Fix problem displaying statuses with no text in the event feed
+  * Re-organise login screen
+  * Add registration button
+  * Remove unnecessary import of QtWebkit
+
+ -- Michael Sheldon <elleo@gnu.org>  Thu, 14 Jun 2012 19:41:12 +0100
+
 statusnet-meego (0.2.1-1) unstable; urgency=low
 
   * Make URLs clickable
