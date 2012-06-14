@@ -74,10 +74,10 @@ class StatusNetHandler(dbus.service.Object):
 	def updateTimeline(self):
 		self.login()
 		statuses = self.statusNet.statuses_home_timeline(self.latest)
-		for status in statuses:
-			self.showStatus(status)
 		if len(statuses) > 0:
 			self.client.set_int('/apps/ControlPanel/Statusnet/latest', statuses[0]['id'])
+		for status in statuses:
+			self.showStatus(status)
 		self.app.exit()
 
 
