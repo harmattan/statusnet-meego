@@ -6,7 +6,7 @@ PageStackWindow {
 	property int pageMargin: 16;
 	property string username: "";
 	property string password: "";
-	property string api_path: "https://identi.ca/api";
+	property string api_path: "";
 	property string url: "";
 
 	Component.onCompleted: {
