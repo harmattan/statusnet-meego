@@ -6,8 +6,9 @@ PageStackWindow {
 	id: rootWin;
 	property int pageMargin: 16;
 	property bool showFetch: true;
-	property int currentMessage: -1;
-	property bool currentMessageFavourite: false;
+	property int currentStatus: -1;
+	property bool currentStatusFavourite: false;
+	property bool currentStatusFollowing: false;
 
 	Component.onCompleted: {
 		theme.inverted = true;

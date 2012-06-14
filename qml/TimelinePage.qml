@@ -112,31 +112,40 @@ Page {
 					rootWin.showBack();
 				}
 				onPressAndHold: {
-					statusDelegateMenu.open();
+					rootWin.currentStatus = model.statusid
+					rootWin.currentStatusFavourite = model.favourite
+					rootWin.currentStatusFollowing = model.following
+					statusMenu.open();
 				}
 			}
 
-			Menu {
-				id: statusDelegateMenu
-				anchors.bottomMargin: commonTools.height;
-				content: MenuLayout {
+		}
 
-					MenuItem {
-						text: "Repeat this message"
-						onClicked: rootWin.repeat(model.statusid);
-					}
+	}
 
-					MenuItem {
-						text: model.favourite ? "Unfavourite this message" : "Favourite this message"
-						onClicked: {
-							if (model.favourite) {
-								rootWin.unfavourite(model.statusid);
-							} else {
-								rootWin.favourite(model.statusid);
-							}
-						}
+	Menu {
+		id: statusMenu
+		anchors.bottomMargin: commonTools.height;
+		content: MenuLayout {
+
+			MenuItem {
+				text: "Repeat this message"
+				onClicked: rootWin.repeat(rootWin.currentStatus);
+			}
+
+			MenuItem {
+				text: rootWin.currentStatusFavourite ? "Unfavourite this message" : "Favourite this message"
+				onClicked: {
+					if (rootWin.currentStatusFavourite) {
+						rootWin.unfavourite(rootWin.currentStatus);
+					} else {
+						rootWin.favourite(rootWin.currentStatus);
 					}
 				}
+			}
+
+			MenuItem {
+				text: rootWin.currentStatusFollowing ? "Unfollow this user" : "Follow this user"
 			}
 		}
 	}
